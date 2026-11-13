@@ -1,0 +1,13 @@
+import { contextBridge, ipcRenderer } from 'electron'
+
+const EVENTS = new Set(['task', 'game:log', 'game:state', 'account:login', 'win:state', 'plugins:changed', 'plugins:log', 'plugins:toast', 'server:log', 'server:state'])
+
+contextBridge.exposeInMainWorld('bridge', {
+  invoke: (name: string, ...args: unknown[]) => ipcRenderer.invoke(`api:${name}`, ...args),
+  on: (channel: string, listener: (payload: unknown) => void) => {
+    if (!EVENTS.has(channel)) throw new Error(`Неизвестное событие: ${channel}`)
+    const wrapped = (_: unknown, payload: unknown): void => listener(payload)
+    ipcRenderer.on(channel, wrapped)
+    return () => ipcRenderer.removeListener(channel, wrapped)
+  }
+})

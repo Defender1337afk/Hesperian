@@ -1,0 +1,57 @@
+.app .titlebar { position: relative; background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 86%, var(--accent) 4%), var(--panel)); }
+.app .titlebar::after, .app .statusbar::before {
+  content: ''; position: absolute; left: 0; right: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, hsl(var(--accent-h) 60% 60% / .55) 30%, hsl(calc(var(--accent-h) + 60) 60% 60% / .35) 70%, transparent);
+}
+.app .titlebar::after { bottom: 0; }
+.app .statusbar { position: relative; }
+.app .statusbar::before { top: 0; opacity: .6; }
+
+.app .tab { transition: background .15s, color .15s; }
+.app .tab.active { position: relative; }
+.app .tab.active::before { content: ''; position: absolute; left: 10px; right: 10px; top: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.app .rail-ind { box-shadow: 0 0 14px var(--accent); }
+.app .rail .icon-btn { transition: background .15s, color .15s, transform .2s cubic-bezier(.2, 1.4, .4, 1); }
+.app .rail .icon-btn:hover { transform: scale(1.08); }
+.app .tree-row { transition: background .12s, padding-left .2s; }
+.app .tree-row:hover .fdot { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent); }
+
+.app .welcome::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .55;
+  background: radial-gradient(40% 50% at 12% 8%, hsl(var(--accent-h) 70% 55% / .14), transparent 70%),
+    radial-gradient(35% 45% at 88% 92%, hsl(calc(var(--accent-h) + 70) 70% 60% / .1), transparent 70%);
+}
+.app .welcome-inner { position: relative; }
+.app .wm { background: linear-gradient(110deg, var(--text) 30%, color-mix(in srgb, var(--text) 55%, var(--accent)) 70%, var(--text)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.app .wm span { color: var(--accent); -webkit-text-fill-color: var(--accent); display: inline-block; transition: transform .25s cubic-bezier(.2, 1.6, .4, 1); }
+.app .wm span:active { transform: scale(.8); }
+.app .w-row, .app .w-recent { transition: background .15s, transform .2s cubic-bezier(.2, 1.2, .4, 1); }
+.app .w-row:hover, .app .w-recent:hover { transform: translateX(3px); }
+.app .w-row:hover svg { color: var(--accent); }
+.app .feat { transition: background .15s; border-radius: calc(var(--radius) + 2px); }
+.app .feat:hover { background: var(--hover); }
+
+.plug-card, .srv-card, .srv-friend, .account-card { transition: transform .2s cubic-bezier(.2, 1.2, .4, 1), border-color .2s, box-shadow .2s; }
+.plug-card:hover, .srv-card:hover, .srv-friend:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+.btn.primary { transition: transform .15s, opacity .15s, box-shadow .2s; }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 6px 18px -8px var(--accent); }
+
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--faint); background-clip: padding-box; border: 3px solid transparent; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+.splash { position: absolute; left: 100%; top: -14px; margin-left: 4px; white-space: nowrap; font: 700 15px/1 var(--sans, inherit); color: #ffe14d;
+  text-shadow: 2px 2px 0 #3f3a00; transform: rotate(-16deg); animation: splash .55s ease-in-out infinite alternate; cursor: default; user-select: none; }
+@keyframes splash { to { transform: rotate(-16deg) scale(1.08); } }
+.wm-wrap { position: relative; display: inline-block; }
+
+.party { animation: party 1.6s linear infinite; }
+@keyframes party { to { filter: hue-rotate(360deg); } }
+.creeper-flash { position: fixed; inset: 0; pointer-events: none; z-index: 60; background: radial-gradient(circle, rgba(80, 220, 90, .25), transparent 70%); animation: creeper 1.2s ease-out forwards; }
+@keyframes creeper { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+.snow { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.snow i { position: absolute; top: -10px; width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, .7); animation: snow linear infinite; }
+@keyframes snow { to { transform: translate3d(30px, 105vh, 0); } }
+@media (prefers-reduced-motion: reduce) { .splash, .party, .snow i { animation: none; } }

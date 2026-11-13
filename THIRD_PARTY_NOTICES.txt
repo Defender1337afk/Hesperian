@@ -1,0 +1,10 @@
+Hesperian использует сторонние компоненты:
+
+Electron, MIT (лицензии Chromium лежат рядом с программой)
+React, react-dom, zustand, immer, use-sync-external-store, MIT
+marked, adm-zip, MIT
+DOMPurify, MPL-2.0 или Apache-2.0
+Шрифт Geist, SIL Open Font License 1.1
+Astra Visuals, см. уведомления внутри файла мода
+
+Minecraft принадлежит Mojang Studios. Hesperian не связан с Mojang и Microsoft и ими не одобрен.

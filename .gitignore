@@ -1,0 +1,10 @@
+node_modules/
+out/
+release/
+*.log
+installer/bin/
+installer/obj/
+resources/mods/
+
+src/renderer/public/astra/
+assets/tilkayo.jpg

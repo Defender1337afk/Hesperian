@@ -1,0 +1,100 @@
+{
+  "name": "hesperian",
+  "productName": "Hesperian",
+  "version": "1.2.2",
+  "description": "Лаунчер Minecraft для версий от 1.16.5 до новейших",
+  "author": "Hesperian",
+  "license": "GPL-3.0-only",
+  "main": "out/main/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "tsc --noEmit",
+    "dist": "node scripts/sync-mods.mjs && electron-vite build && electron-builder --win --dir && node installer/build.mjs",
+    "dist:linux": "node scripts/sync-mods.mjs && electron-vite build && electron-builder --linux",
+    "dist:portable": "node scripts/sync-mods.mjs && electron-vite build && electron-builder --win portable"
+  },
+  "build": {
+    "appId": "app.hesperian.launcher",
+    "productName": "Hesperian",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "dir"
+      ],
+      "icon": "src/renderer/public/icon.png",
+      "signExecutable": false
+    },
+    "extraResources": [
+      {
+        "from": "resources/mods",
+        "to": "mods",
+        "filter": [
+          "*.jar"
+        ]
+      },
+      {
+        "from": "resources/plugins",
+        "to": "plugins"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.txt",
+        "to": "THIRD_PARTY_NOTICES.txt"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE.txt"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "icon": "src/renderer/public/icon.png",
+      "category": "Game",
+      "executableName": "hesperian",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "synopsis": "Лаунчер Minecraft",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "Hesperian"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "portable": {
+      "artifactName": "Hesperian-${version}-portable.exe"
+    }
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "dompurify": "^3.4.17",
+    "marked": "^18.1.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "playwright-core": "^1.64.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  },
+  "desktopName": "hesperian.desktop"
+}

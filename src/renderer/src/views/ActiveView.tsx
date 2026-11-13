@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { InstanceView } from './InstanceView'
 import { PluginsView } from './PluginsView'
 import { ServersView } from './ServersView'
+import { SkinsView } from './SkinsView'
 import { ProjectView } from './ProjectView'
 import { SettingsView } from './SettingsView'
 import { Welcome } from './Welcome'
@@ -23,5 +24,7 @@ export function ActiveView(): ReactNode {
       return <PluginsView />
     case 'servers':
       return <ServersView />
+    case 'skins':
+      return <SkinsView />
   }
 }

@@ -22,7 +22,7 @@ export type Stage = 'home' | 'store' | 'tab'
 
 export interface Tab {
   id: string
-  kind: 'welcome' | 'instance' | 'project' | 'settings' | 'plugins' | 'servers'
+  kind: 'welcome' | 'instance' | 'project' | 'settings' | 'plugins' | 'servers' | 'skins'
   title: string
   ref?: string
 }
@@ -64,6 +64,7 @@ const WELCOME: Tab = { id: 'welcome', kind: 'welcome', title: 'Начало' }
 const SETTINGS: Tab = { id: 'settings', kind: 'settings', title: 'Настройки' }
 const PLUGINS: Tab = { id: 'plugins', kind: 'plugins', title: 'Плагины' }
 const SERVERS: Tab = { id: 'servers', kind: 'servers', title: 'Серверы' }
+const SKINS: Tab = { id: 'skins', kind: 'skins', title: 'Скины' }
 
 interface State {
   ready: boolean
@@ -122,6 +123,7 @@ interface State {
   openSettings(): void
   openPlugins(): void
   openServers(): void
+  openSkins(): void
   refreshPlugins(): Promise<void>
   closeWhatsNew(): void
   openWelcome(): void
@@ -312,6 +314,7 @@ export const useStore = create<State>((set, get) => ({
   openSettings: () => get().openTab(SETTINGS),
   openPlugins: () => get().openTab(PLUGINS),
   openServers: () => get().openTab(SERVERS),
+  openSkins: () => get().openTab(SKINS),
   async refreshPlugins() {
     try {
       set({ plugins: await api.listPlugins() })

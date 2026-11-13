@@ -275,3 +275,18 @@ export interface ServerPing {
   motd?: string
   error?: string
 }
+
+export interface SkinProfile {
+  name: string
+  skinUrl?: string
+  variant: 'classic' | 'slim'
+  capes: { id: string; alias: string; url: string; active: boolean }[]
+}
+
+export interface SkinLibraryItem {
+  id: string
+  name: string
+  variant: 'classic' | 'slim'
+  addedAt: number
+  data: string
+}

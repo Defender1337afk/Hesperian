@@ -82,6 +82,8 @@ export function Rail(): ReactNode {
   const pluginsActive = useStore((s) => s.activeTabId === 'plugins')
   const openServers = useStore((s) => s.openServers)
   const serversActive = useStore((s) => s.activeTabId === 'servers')
+  const openSkins = useStore((s) => s.openSkins)
+  const skinsActive = useStore((s) => s.activeTabId === 'skins')
   const index = RAIL.findIndex(([k]) => k === sidebar)
   return (
     <aside className="rail">
@@ -91,6 +93,7 @@ export function Rail(): ReactNode {
       ))}
       <IconBtn icon={I.globe} title="Серверы" active={serversActive} onClick={openServers} />
       <IconBtn icon={I.puzzle} title="Плагины" active={pluginsActive} onClick={openPlugins} />
+      <IconBtn icon={I.shirt} title="Скины" active={skinsActive} onClick={openSkins} />
       <div className="rail-spacer" />
       <IconBtn icon={I.terminal} title="Вывод игры (Ctrl+`)" active={panelOpen} onClick={() => useStore.setState({ panelOpen: !panelOpen })} />
       <IconBtn icon={I.settings} title="Настройки (Ctrl+,)" active={settingsActive} onClick={openSettings} />

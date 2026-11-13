@@ -3,7 +3,7 @@ import { describeInstance } from '../components/common'
 import { I } from '../components/icons'
 import { openPacks } from '../components/menus'
 import { useStore } from '../store'
-import { Snow, Splash } from '../components/Fun'
+import { Snow } from '../components/Fun'
 
 const SHORTCUTS: [string, string][] = [
   ['Все команды', 'Ctrl ⇧ P'],
@@ -33,7 +33,7 @@ export function Welcome(): ReactNode {
   return (
     <div className="welcome">
       <div className="welcome-inner">
-        <div className="wm-wrap rise"><h1 className="wm">Hesperian<span onClick={secret}>.</span></h1><Splash /></div>
+        <h1 className="wm rise">Hesperian<span onClick={secret}>.</span></h1>
         <Snow />
         <p className="hero-sub rise" style={rise(1)}>{account ? `С возвращением, ${account.name}.` : 'Собирай, запускай, играй.'}</p>
         <div className="welcome-grid">

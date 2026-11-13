@@ -3,32 +3,6 @@ import type { Instance } from '../../../shared/types'
 import { onEvent } from '../bridge'
 import { useStore } from '../store'
 
-const SPLASHES = [
-  'Теперь с серверами!',
-  'Проклято, но работает!',
-  'Cursed edition!',
-  '100% без криперов!',
-  'Сделано на Linux!',
-  'Работает и в wine!',
-  'Ctrl+Shift+P!',
-  'Бэкап? Бэкап!',
-  'Sodium внутри!',
-  'Radmin VPN friendly!',
-  'Ещё одну сборку!',
-  'Хорошо собранный!',
-  'Спасибо, что играешь!',
-  'Майнкрафт, но удобнее!'
-]
-
-export function Splash(): ReactNode {
-  const [i, setI] = useState(() => Math.floor(Math.random() * SPLASHES.length))
-  return (
-    <span className="splash" onClick={() => setI((v) => (v + 1 + Math.floor(Math.random() * (SPLASHES.length - 1))) % SPLASHES.length)}>
-      {SPLASHES[i]}
-    </span>
-  )
-}
-
 export function Snow(): ReactNode {
   const animations = useStore((s) => s.settings?.animations ?? true)
   const month = new Date().getMonth()

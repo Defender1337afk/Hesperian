@@ -20,6 +20,7 @@ import * as modrinth from './modrinth'
 import * as updates from './updates'
 import * as plugins from './plugins'
 import * as servers from './servers'
+import * as skins from './skins'
 import { restoreWindow, unloadWindow } from './window'
 import { optimizeInstance } from './optimize'
 import { updateLocalMods } from './localmods'
@@ -124,6 +125,22 @@ export const api = {
 
   optimizeInstance,
   microsoftLoginAvailable: async () => accounts.microsoftLoginAvailable(),
+  skinProfile: skins.skinProfile,
+  uploadSkin: skins.uploadSkin,
+  resetSkin: skins.resetSkin,
+  setCape: skins.setCape,
+  skinLibrary: async () => skins.skinLibrary(),
+  saveSkin: async (name: string, data: string, variant: 'classic' | 'slim') => skins.saveSkin(name, data, variant),
+  removeSkin: async (id: string) => skins.removeSkin(id),
+  skinFromUrl: skins.skinFromUrl,
+  pickSkinFile: async () => {
+    const parent = window()
+    const options = { properties: ['openFile'] as 'openFile'[], filters: [{ name: 'Скин PNG', extensions: ['png'] }] }
+    const res = parent ? await dialog.showOpenDialog(parent, options) : await dialog.showOpenDialog(options)
+    if (res.canceled) return null
+    const data = await readFile(res.filePaths[0])
+    return { name: res.filePaths[0].split(/[\\/]/).pop()!.replace(/\.png$/i, ''), data: `data:image/png;base64,${data.toString('base64')}` }
+  },
   listServers: async () => servers.listServers(),
   createServer: async (input: Parameters<typeof servers.createServer>[0]) => servers.createServer(input),
   updateServer: async (id: string, patch: Parameters<typeof servers.updateServer>[1]) => servers.updateServer(id, patch),

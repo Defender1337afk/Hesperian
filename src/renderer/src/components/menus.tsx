@@ -92,6 +92,7 @@ export function commands(): MenuEntry[] {
     { label: 'Боковая панель', kbd: 'Ctrl+B', run: () => s.toggleSidebar() },
     { label: 'Вывод игры', kbd: 'Ctrl+`', run: () => useStore.setState({ panelOpen: !s.panelOpen }) },
     { label: 'Серверы', run: () => s.openServers() },
+    { label: 'Скины', run: () => s.openSkins() },
     { label: 'Плагины', run: () => s.openPlugins() },
     { label: 'Новый плагин…', run: () => void s.prompt('Новый плагин', 'Название плагина', 'Создать').then((name) => { if (name) void api.createPlugin(name).then(() => s.openPlugins()).catch((e: unknown) => s.toast('error', e instanceof Error ? e.message : String(e))) }) },
     { label: 'Перезагрузить плагины', run: () => void api.reloadPlugins() },

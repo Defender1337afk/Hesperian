@@ -8,6 +8,7 @@ import { setEventSink } from './events'
 import { anyRunning } from './minecraft/launch'
 import { stopAllServers } from './servers'
 import { setWindowFactory } from './window'
+import { allowSkinWebviews, watchSkinBrowser } from './skins'
 
 const hidden = process.env.HESPERIAN_HIDDEN === '1'
 
@@ -29,11 +30,13 @@ function createWindow(): void {
       contextIsolation: true,
       sandbox: true,
       spellcheck: false,
+      webviewTag: true,
       offscreen: hidden,
       backgroundThrottling: !hidden
     }
   })
 
+  allowSkinWebviews(win)
   if (windowMaximized) win.maximize()
   if (!hidden) win.once('ready-to-show', () => win.show())
 
@@ -88,6 +91,7 @@ if (!app.requestSingleInstanceLock()) {
     })
     expose()
     setWindowFactory(createWindow)
+    watchSkinBrowser()
     createWindow()
     void loadPlugins().catch((e) => console.error('Плагины не загрузились', e))
     app.on('activate', () => {

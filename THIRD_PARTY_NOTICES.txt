@@ -8,3 +8,6 @@ DOMPurify, MPL-2.0 или Apache-2.0
 Astra Visuals, см. уведомления внутри файла мода
 
 Minecraft принадлежит Mojang Studios. Hesperian не связан с Mojang и Microsoft и ими не одобрен.
+
+skinview3d (MIT) — https://github.com/bs-community/skinview3d
+three.js (MIT) — https://github.com/mrdoob/three.js

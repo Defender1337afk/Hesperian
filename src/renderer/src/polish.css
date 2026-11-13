@@ -22,8 +22,7 @@
     radial-gradient(35% 45% at 88% 92%, hsl(calc(var(--accent-h) + 70) 70% 60% / .1), transparent 70%);
 }
 .app .welcome-inner { position: relative; }
-.app .wm { background: linear-gradient(110deg, var(--text) 30%, color-mix(in srgb, var(--text) 55%, var(--accent)) 70%, var(--text)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.app .wm span { color: var(--accent); -webkit-text-fill-color: var(--accent); display: inline-block; transition: transform .25s cubic-bezier(.2, 1.6, .4, 1); }
+.app .wm span { color: var(--accent); display: inline-block; transition: transform .25s cubic-bezier(.2, 1.6, .4, 1); }
 .app .wm span:active { transform: scale(.8); }
 .app .w-row, .app .w-recent { transition: background .15s, transform .2s cubic-bezier(.2, 1.2, .4, 1); }
 .app .w-row:hover, .app .w-recent:hover { transform: translateX(3px); }
@@ -41,10 +40,6 @@
 *::-webkit-scrollbar-thumb:hover { background: var(--faint); background-clip: padding-box; border: 3px solid transparent; }
 *::-webkit-scrollbar-track { background: transparent; }
 
-.splash { position: absolute; left: 100%; top: -14px; margin-left: 4px; white-space: nowrap; font: 700 15px/1 var(--sans, inherit); color: #ffe14d;
-  text-shadow: 2px 2px 0 #3f3a00; transform: rotate(-16deg); animation: splash .55s ease-in-out infinite alternate; cursor: default; user-select: none; }
-@keyframes splash { to { transform: rotate(-16deg) scale(1.08); } }
-.wm-wrap { position: relative; display: inline-block; }
 
 .party { animation: party 1.6s linear infinite; }
 @keyframes party { to { filter: hue-rotate(360deg); } }
@@ -54,4 +49,4 @@
 .snow { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
 .snow i { position: absolute; top: -10px; width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, .7); animation: snow linear infinite; }
 @keyframes snow { to { transform: translate3d(30px, 105vh, 0); } }
-@media (prefers-reduced-motion: reduce) { .splash, .party, .snow i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .party, .snow i { animation: none; } }

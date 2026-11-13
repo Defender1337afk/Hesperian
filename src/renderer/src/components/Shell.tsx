@@ -78,8 +78,6 @@ export function Rail(): ReactNode {
   const settingsActive = useStore((s) => s.activeTabId === 'settings')
   const toggleRail = useStore((s) => s.toggleRail)
   const openSettings = useStore((s) => s.openSettings)
-  const openPlugins = useStore((s) => s.openPlugins)
-  const pluginsActive = useStore((s) => s.activeTabId === 'plugins')
   const openServers = useStore((s) => s.openServers)
   const serversActive = useStore((s) => s.activeTabId === 'servers')
   const openSkins = useStore((s) => s.openSkins)
@@ -92,7 +90,6 @@ export function Rail(): ReactNode {
         <IconBtn key={key} icon={icon} title={title} active={sidebar === key} onClick={() => toggleRail(key)} />
       ))}
       <IconBtn icon={I.globe} title="Серверы" active={serversActive} onClick={openServers} />
-      <IconBtn icon={I.puzzle} title="Плагины" active={pluginsActive} onClick={openPlugins} />
       <IconBtn icon={I.shirt} title="Скины" active={skinsActive} onClick={openSkins} />
       <div className="rail-spacer" />
       <IconBtn icon={I.terminal} title="Вывод игры (Ctrl+`)" active={panelOpen} onClick={() => useStore.setState({ panelOpen: !panelOpen })} />

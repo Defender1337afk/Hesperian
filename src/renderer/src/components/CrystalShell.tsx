@@ -37,7 +37,6 @@ function CrystalTop(): ReactNode {
         <button className={`c-round ${panelOpen ? 'on' : ''}`} title="Вывод игры (Ctrl+`)" onClick={() => useStore.setState({ panelOpen: !panelOpen })}><I.terminal size={16} /></button>
         <button className="c-round" title="Серверы" onClick={() => useStore.getState().openServers()}><I.globe size={16} /></button>
         <button className="c-round" title="Скины" onClick={() => useStore.getState().openSkins()}><I.shirt size={16} /></button>
-        <button className="c-round" title="Плагины" onClick={() => useStore.getState().openPlugins()}><I.puzzle size={16} /></button>
         <button className="c-round" title="Настройки (Ctrl+,)" onClick={openSettings}><I.settings size={16} /></button>
         {account ? (
           <button className={`avatar-btn ${accountOpen ? 'on' : ''}`} title={account.name} onClick={() => useStore.setState({ accountOpen: !accountOpen })}>

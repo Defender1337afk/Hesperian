@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron'
 import { releaseName } from '../shared/release'
-import { loadPlugins } from './plugins'
 import { join } from 'node:path'
 import { api } from './api'
 import { getSettings, updateSettings } from './config'
@@ -93,7 +92,6 @@ if (!app.requestSingleInstanceLock()) {
     setWindowFactory(createWindow)
     watchSkinBrowser()
     createWindow()
-    void loadPlugins().catch((e) => console.error('Плагины не загрузились', e))
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })

@@ -18,9 +18,9 @@ import { listVersions } from './minecraft/vanilla'
 import * as modpacks from './modpacks'
 import * as modrinth from './modrinth'
 import * as updates from './updates'
-import * as plugins from './plugins'
 import * as servers from './servers'
 import * as skins from './skins'
+import { checkUpdate } from './update'
 import { restoreWindow, unloadWindow } from './window'
 import { optimizeInstance } from './optimize'
 import { updateLocalMods } from './localmods'
@@ -106,15 +106,12 @@ export const api = {
     }
     const auth = await accounts.getLaunchAuth()
     const updated = await updateLocalMods(id).catch(() => [] as string[])
-    if (updated.length) emit('plugins:toast', { text: `Обновлено: ${updated.join(', ')}`, kind: 'info' })
+    if (updated.length) emit('app:toast', { text: `Обновлено: ${updated.join(', ')}`, kind: 'info' })
     instances.updateInstance(id, { lastPlayedAt: Date.now() })
-    const extra = await plugins.beforeLaunch(instance)
-    const launched = extra.length ? { ...instance, jvmArgs: [instance.jvmArgs ?? '', ...extra].join(' ').trim() } : instance
     const server = options?.server?.trim() || undefined
-    await launchGame(launched, auth, (played) => {
+    await launchGame(instance, auth, (played) => {
       const current = instances.getInstance(id)
       instances.updateInstance(id, { playTimeSec: current.playTimeSec + played })
-      void plugins.afterExit(current, played)
       restoreWindow()
     }, server)
     const after = getSettings().afterLaunch
@@ -124,6 +121,7 @@ export const api = {
   stop: async (id: string) => stopGame(id),
 
   optimizeInstance,
+  checkUpdate,
   microsoftLoginAvailable: async () => accounts.microsoftLoginAvailable(),
   skinProfile: skins.skinProfile,
   uploadSkin: skins.uploadSkin,
@@ -157,18 +155,6 @@ export const api = {
   pingServer: (address: string) => servers.pingServer(address),
   setLowEnd: async (on: boolean) =>
     updateSettings(on ? { lowEnd: true, afterLaunch: 'unload', animations: false } : { lowEnd: false, afterLaunch: 'keep', animations: true }),
-  bundledPlugins: async () => plugins.bundledPlugins(),
-  installBundledPlugin: plugins.installBundledPlugin,
-  listPlugins: async () => plugins.listPlugins(),
-  reloadPlugins: async () => {
-    await plugins.loadPlugins()
-    return plugins.listPlugins()
-  },
-  setPluginEnabled: plugins.setPluginEnabled,
-  runPluginCommand: plugins.runPluginCommand,
-  createPlugin: plugins.createPlugin,
-  openPluginsFolder: plugins.openPluginsFolder,
-  pluginLogs: async () => plugins.pluginLogs(),
 
   astraHome: async (id: string) => astra.readHome(instances.getInstance(id)),
   setAstraStyle: async (id: string, style: number) => astra.writeStyle(instances.getInstance(id), style),

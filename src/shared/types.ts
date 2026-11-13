@@ -205,25 +205,7 @@ export interface ContentUpdate {
   toVersionNumber: string
 }
 
-export interface PluginInfo {
-  id: string
-  name: string
-  version: string
-  description: string
-  author: string
-  enabled: boolean
-  error?: string
-  folder: string
-  commands: { id: string; title: string }[]
-  hooks: number
-}
 
-export interface PluginLogLine {
-  pluginId: string
-  text: string
-  level: 'info' | 'warn' | 'error'
-  at: number
-}
 
 export interface AstraHome {
   installed: boolean
@@ -289,4 +271,13 @@ export interface SkinLibraryItem {
   variant: 'classic' | 'slim'
   addedAt: number
   data: string
+}
+
+export interface UpdateCheck {
+  state: 'none' | 'available' | 'offline'
+  current: string
+  version?: string
+  codename?: string
+  notes?: string
+  url?: string
 }

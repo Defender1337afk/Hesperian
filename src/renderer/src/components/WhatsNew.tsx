@@ -5,7 +5,6 @@ import { useStore } from '../store'
 export function WhatsNew(): ReactNode {
   const open = useStore((s) => s.whatsNewOpen)
   const close = useStore((s) => s.closeWhatsNew)
-  const openPlugins = useStore((s) => s.openPlugins)
   if (!open) return null
   return (
     <div className="scrim" onMouseDown={(e) => e.target === e.currentTarget && close()} onKeyDown={(e) => e.key === 'Escape' && close()}>
@@ -32,7 +31,6 @@ export function WhatsNew(): ReactNode {
           ))}
         </div>
         <div className="dialog-actions">
-          <button className="btn" onClick={() => { close(); openPlugins() }}>К плагинам</button>
           <button className="btn primary" autoFocus onClick={close}>Отлично</button>
         </div>
       </div>

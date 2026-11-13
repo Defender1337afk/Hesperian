@@ -30,8 +30,8 @@
 .app .feat { transition: background .15s; border-radius: calc(var(--radius) + 2px); }
 .app .feat:hover { background: var(--hover); }
 
-.plug-card, .srv-card, .srv-friend, .account-card { transition: transform .2s cubic-bezier(.2, 1.2, .4, 1), border-color .2s, box-shadow .2s; }
-.plug-card:hover, .srv-card:hover, .srv-friend:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+.srv-card, .srv-friend, .account-card { transition: transform .2s cubic-bezier(.2, 1.2, .4, 1), border-color .2s, box-shadow .2s; }
+.srv-card:hover, .srv-friend:hover { transform: translateY(-2px); border-color: var(--line-strong); }
 .btn.primary { transition: transform .15s, opacity .15s, box-shadow .2s; }
 .btn.primary:hover:not(:disabled) { box-shadow: 0 6px 18px -8px var(--accent); }
 

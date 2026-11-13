@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-const EVENTS = new Set(['task', 'game:log', 'game:state', 'account:login', 'win:state', 'plugins:changed', 'plugins:log', 'plugins:toast', 'server:log', 'server:state', 'skins:found'])
+const EVENTS = new Set(['task', 'game:log', 'game:state', 'account:login', 'win:state', 'app:toast', 'server:log', 'server:state', 'skins:found'])
 
 contextBridge.exposeInMainWorld('bridge', {
   invoke: (name: string, ...args: unknown[]) => ipcRenderer.invoke(`api:${name}`, ...args),

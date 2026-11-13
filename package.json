@@ -42,10 +42,6 @@
         ]
       },
       {
-        "from": "resources/plugins",
-        "to": "plugins"
-      },
-      {
         "from": "THIRD_PARTY_NOTICES.txt",
         "to": "THIRD_PARTY_NOTICES.txt"
       },

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { useStore } from '../store'
 import { InstanceView } from './InstanceView'
-import { PluginsView } from './PluginsView'
 import { ServersView } from './ServersView'
 import { SkinsView } from './SkinsView'
 import { ProjectView } from './ProjectView'
@@ -20,8 +19,6 @@ export function ActiveView(): ReactNode {
       return <ProjectView key={tab.ref} projectId={tab.ref!} />
     case 'settings':
       return <SettingsView />
-    case 'plugins':
-      return <PluginsView />
     case 'servers':
       return <ServersView />
     case 'skins':

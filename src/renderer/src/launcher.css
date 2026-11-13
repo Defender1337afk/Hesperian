@@ -179,27 +179,8 @@
 .ex-shot img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; cursor: zoom-in; }
 .ex-shot figcaption { display: flex; align-items: center; gap: 4px; padding: 6px 8px; font-size: 12px; }
 
-.plugins-page { max-width: 820px; }
-.plug-actions { gap: 8px; margin: 18px 0 10px; flex-wrap: wrap; }
-.plug-actions .btn { display: inline-flex; align-items: center; gap: 6px; }
-.plug-warn { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin: 0 0 22px; }
-.plug-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
 .plug-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 20px; border: 1px dashed var(--line-strong); border-radius: calc(var(--radius) + 6px); color: var(--muted); text-align: center; }
 .plug-empty b { color: var(--text); }
-.plug-card { padding: 14px 16px; background: var(--raised); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); transition: opacity .2s; }
-.plug-card.off { opacity: .62; }
-.plug-head { display: flex; align-items: center; gap: 12px; }
-.plug-head .grow { display: flex; flex-direction: column; min-width: 0; }
-.plug-head small { color: var(--muted); }
-.plug-icon { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, hsl(var(--accent-h) 70% 58%), hsl(calc(var(--accent-h) + 50) 70% 50%)); }
-.plug-error { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding: 8px 10px; border-radius: var(--radius); color: #ff8a80; background: rgba(255, 82, 82, .1); font-size: 12px; }
-.plug-cmds { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
-.plug-cmds .btn { display: inline-flex; align-items: center; gap: 6px; }
-.plug-folder { margin-top: 10px; padding: 0; border: 0; background: none; color: var(--muted); font: 11px var(--mono, monospace); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-.plug-folder:hover { color: var(--text); }
-.plug-log { max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: calc(var(--radius) + 2px); background: var(--panel); font: 12px/1.6 var(--mono, monospace); }
-.plug-line.warn { color: #ffcc66; }
-.plug-line.error { color: #ff8a80; }
 
 .whats-new { width: 640px; max-height: 86vh; overflow: auto; }
 .wn-hero { text-align: center; padding: 8px 0 16px; }
@@ -232,10 +213,6 @@
 .road-row small { color: var(--muted); }
 .road-status { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
 .sb-release { font-weight: 600; background: linear-gradient(120deg, #b388ff, #ff5c8a 50%, #ffb74d); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
-.plug-ready { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-bottom: 26px; }
-.plug-ready-card { display: flex; flex-direction: column; gap: 4px; padding: 14px; border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); background: var(--raised); }
-.plug-ready-card small { color: var(--muted); line-height: 1.45; flex: 1; }
-.plug-ready-card .btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; }
 
 .servers-page { max-width: 880px; }
 .section-row { display: flex; align-items: center; justify-content: space-between; margin: 26px 0 12px; }

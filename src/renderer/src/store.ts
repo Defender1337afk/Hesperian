@@ -7,7 +7,6 @@ import type {
   Instance,
   LogLine,
   McVersion,
-  PluginInfo,
   Settings,
   StoreKind,
   SystemInfo,
@@ -22,7 +21,7 @@ export type Stage = 'home' | 'store' | 'tab'
 
 export interface Tab {
   id: string
-  kind: 'welcome' | 'instance' | 'project' | 'settings' | 'plugins' | 'servers' | 'skins'
+  kind: 'welcome' | 'instance' | 'project' | 'settings' | 'servers' | 'skins'
   title: string
   ref?: string
 }
@@ -62,13 +61,11 @@ interface PromptRequest {
 const MAX_LOG_LINES = 5000
 const WELCOME: Tab = { id: 'welcome', kind: 'welcome', title: 'Начало' }
 const SETTINGS: Tab = { id: 'settings', kind: 'settings', title: 'Настройки' }
-const PLUGINS: Tab = { id: 'plugins', kind: 'plugins', title: 'Плагины' }
 const SERVERS: Tab = { id: 'servers', kind: 'servers', title: 'Серверы' }
 const SKINS: Tab = { id: 'skins', kind: 'skins', title: 'Скины' }
 
 interface State {
   ready: boolean
-  plugins: PluginInfo[]
   clawd: boolean
   toggleClawd(): void
   whatsNewOpen: boolean
@@ -121,10 +118,8 @@ interface State {
   openInstance(id: string): void
   openProject(id: string, title: string): void
   openSettings(): void
-  openPlugins(): void
   openServers(): void
   openSkins(): void
-  refreshPlugins(): Promise<void>
   closeWhatsNew(): void
   openWelcome(): void
   play(id: string, server?: string): Promise<void>
@@ -147,7 +142,6 @@ const errorText = (e: unknown): string => (e instanceof Error ? e.message : Stri
 
 export const useStore = create<State>((set, get) => ({
   ready: false,
-  plugins: [],
   clawd: (() => {
     try {
       return localStorage.getItem('clawd') === '1'
@@ -221,7 +215,6 @@ export const useStore = create<State>((set, get) => ({
       whatsNewOpen: settings.seenRelease !== CURRENT.version
     })
     subscribe()
-    void get().refreshPlugins()
     try {
       set({ versions: await api.listVersions() })
     } catch (e) {
@@ -312,15 +305,8 @@ export const useStore = create<State>((set, get) => ({
 
   openProject: (id, title) => get().openTab({ id: `project:${id}`, kind: 'project', title, ref: id }),
   openSettings: () => get().openTab(SETTINGS),
-  openPlugins: () => get().openTab(PLUGINS),
   openServers: () => get().openTab(SERVERS),
   openSkins: () => get().openTab(SKINS),
-  async refreshPlugins() {
-    try {
-      set({ plugins: await api.listPlugins() })
-    } catch {
-    }
-  },
   closeWhatsNew() {
     set({ whatsNewOpen: false })
     void get().patchSettings({ seenRelease: CURRENT.version })
@@ -480,8 +466,7 @@ function subscribe(): void {
   subscribed = true
 
   onEvent<{ maximized: boolean }>('win:state', ({ maximized }) => useStore.setState({ maximized }))
-  onEvent('plugins:changed', () => void useStore.getState().refreshPlugins())
-  onEvent<{ text: string; kind: Toast['kind'] }>('plugins:toast', ({ text, kind }) => useStore.getState().toast(kind, text))
+  onEvent<{ text: string; kind: Toast['kind'] }>('app:toast', ({ text, kind }) => useStore.getState().toast(kind, text))
 
   let pending: LogLine[] = []
   let timer: ReturnType<typeof setTimeout> | null = null

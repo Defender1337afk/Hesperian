@@ -36,7 +36,6 @@ export function menuItems(name: string): MenuEntry[] {
       { label: 'Big Picture', kbd: 'F11', run: () => void s.enterBigPicture() },
       { label: 'Настройки', kbd: 'Ctrl+,', run: () => s.openSettings() },
       { label: 'Серверы', run: () => s.openServers() },
-    { label: 'Плагины', run: () => s.openPlugins() },
       { label: 'Закрыть вкладку', kbd: 'Ctrl+W', disabled: !s.activeTabId, run: () => s.activeTabId && s.closeTab(s.activeTabId) },
       { sep: true },
       { label: 'Выход', run: () => void api.winClose() }
@@ -93,11 +92,7 @@ export function commands(): MenuEntry[] {
     { label: 'Вывод игры', kbd: 'Ctrl+`', run: () => useStore.setState({ panelOpen: !s.panelOpen }) },
     { label: 'Серверы', run: () => s.openServers() },
     { label: 'Скины', run: () => s.openSkins() },
-    { label: 'Плагины', run: () => s.openPlugins() },
-    { label: 'Новый плагин…', run: () => void s.prompt('Новый плагин', 'Название плагина', 'Создать').then((name) => { if (name) void api.createPlugin(name).then(() => s.openPlugins()).catch((e: unknown) => s.toast('error', e instanceof Error ? e.message : String(e))) }) },
-    { label: 'Перезагрузить плагины', run: () => void api.reloadPlugins() },
     { label: 'Что нового', run: () => useStore.setState({ whatsNewOpen: true }) },
-    ...s.plugins.flatMap((p) => p.commands.map((c) => ({ label: c.title, run: () => void api.runPluginCommand(p.id, c.id).catch((e: unknown) => s.toast('error', e instanceof Error ? e.message : String(e))) }))),
     ...THEMES.map((t) => ({ label: `Тема: ${t.name}`, run: () => switchTheme(t.id) }))
   ]
 }

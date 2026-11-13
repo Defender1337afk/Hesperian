@@ -123,6 +123,7 @@ export const api = {
   stop: async (id: string) => stopGame(id),
 
   optimizeInstance,
+  microsoftLoginAvailable: async () => accounts.microsoftLoginAvailable(),
   listServers: async () => servers.listServers(),
   createServer: async (input: Parameters<typeof servers.createServer>[0]) => servers.createServer(input),
   updateServer: async (id: string, patch: Parameters<typeof servers.updateServer>[1]) => servers.updateServer(id, patch),

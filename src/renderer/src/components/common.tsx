@@ -57,18 +57,14 @@ export function IconBtn({ icon, title, onClick, active, disabled, cls = '' }: {
 }
 
 export function Avatar({ account, size = 26 }: { account?: Account | null; size?: number }): ReactNode {
-  if (account?.skinUrl) {
+  const skin = account?.skinUrl?.replace(/^http:\/\//, 'https://')
+  if (skin) {
+    const layer = (x: number): React.CSSProperties => ({ backgroundImage: `url(${skin})`, backgroundSize: `${size * 8}px auto`, backgroundPosition: `${-size * x}px ${-size}px` })
     return (
-      <span
-        className="avatar avatar-skin"
-        style={{
-          width: size,
-          height: size,
-          backgroundImage: `url(${account.skinUrl})`,
-          backgroundSize: size * 8,
-          backgroundPosition: `${-size}px ${-size}px`
-        }}
-      />
+      <span className="avatar avatar-skin" style={{ width: size, height: size }}>
+        <i style={layer(1)} />
+        <i className="avatar-hat" style={layer(5)} />
+      </span>
     )
   }
   return (

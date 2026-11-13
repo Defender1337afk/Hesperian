@@ -11,7 +11,9 @@
 [data-theme="paper"] .log-warn { color: #8a6100; }
 [data-theme="paper"] .log-err { color: #b5302a; }
 .menu-danger .mi-label, .menu-danger .mi-check { color: #e5736d; }
-.avatar-skin { background-repeat: no-repeat; image-rendering: pixelated; border-radius: 6px; }
+.avatar-skin { position: relative; overflow: visible; background: transparent; border-radius: 6px; }
+.avatar-skin i { position: absolute; inset: 0; border-radius: 4px; background-repeat: no-repeat; image-rendering: pixelated; }
+.avatar-skin .avatar-hat { transform: scale(1.125); }
 
 .explorer, .store { display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .tree { flex: 1; overflow: auto; padding: 2px 6px 24px; }

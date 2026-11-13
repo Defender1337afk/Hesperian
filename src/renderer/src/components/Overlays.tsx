@@ -141,7 +141,12 @@ export function AccountMenu(): ReactNode {
 
 export function LoginDialog(): ReactNode {
   const open = useStore((s) => s.loginOpen)
-  const clientId = useStore((s) => s.settings?.msClientId ?? '')
+  const settingsClientId = useStore((s) => s.settings?.msClientId ?? '')
+  const [available, setAvailable] = useState(false)
+  useEffect(() => {
+    void api.microsoftLoginAvailable().then(setAvailable)
+  }, [settingsClientId])
+  const clientId = available
   const setAccounts = useStore((s) => s.setAccounts)
   const toast = useStore((s) => s.toast)
   const openSettings = useStore((s) => s.openSettings)
@@ -176,7 +181,7 @@ export function LoginDialog(): ReactNode {
         {!clientId ? (
           <p className="muted">Для входа нужен Azure Client ID. Укажите его в настройках, инструкция есть в README.</p>
         ) : (
-          <p className="muted">Вход идёт в вашем браузере, пароль лаунчеру не передаётся. Нужен для лицензионных серверов, скин подтянется сам.</p>
+          <p className="muted">Вход идёт на странице Microsoft, пароль лаунчеру не передаётся. Нужен для лицензионных серверов, скин подтянется сам.</p>
         )}
         {event?.state === 'code' && (
           <div className="device-code">

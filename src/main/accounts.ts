@@ -22,6 +22,7 @@ interface Secret {
   refreshToken: string
   accessToken: string
   expiresAt: number
+  flow?: 'azure' | 'external' | 'live'
 }
 
 const file = (): string => join(app.getPath('userData'), 'accounts.json')
@@ -82,7 +83,7 @@ const encrypt = (secret: Secret): string => {
 const decrypt = (value: string): Secret =>
   JSON.parse(safeStorage.decryptString(Buffer.from(value, 'base64'))) as Secret
 
-interface MsToken {
+export interface MsToken {
   access_token: string
   refresh_token: string
 }
@@ -101,12 +102,12 @@ const XSTS_ERRORS: Record<number, string> = {
   2148916238: 'Детский аккаунт: его нужно добавить в семейную группу Microsoft.'
 }
 
-async function minecraftLogin(ms: MsToken, progress: (m: string) => void): Promise<{ account: StoredAccount }> {
+async function minecraftLogin(ms: MsToken, progress: (m: string) => void, flow: 'azure' | 'external' = 'azure'): Promise<{ account: StoredAccount }> {
   progress('Вход в Xbox Live')
   const xbl = await postJson<{ Token: string; DisplayClaims: { xui: { uhs: string }[] } }>(
     'https://user.auth.xboxlive.com/user/authenticate',
     {
-      Properties: { AuthMethod: 'RPS', SiteName: 'user.auth.xboxlive.com', RpsTicket: `d=${ms.access_token}` },
+      Properties: { AuthMethod: 'RPS', SiteName: 'user.auth.xboxlive.com', RpsTicket: flow === 'external' ? ms.access_token : `d=${ms.access_token}` },
       RelyingParty: 'http://auth.xboxlive.com',
       TokenType: 'JWT'
     }
@@ -161,12 +162,13 @@ async function minecraftLogin(ms: MsToken, progress: (m: string) => void): Promi
       kind: 'microsoft',
       name: profile.name,
       uuid: profile.id,
-      skinUrl: profile.skins?.find((s) => s.state === 'ACTIVE')?.url,
+      skinUrl: profile.skins?.find((s) => s.state === 'ACTIVE')?.url?.replace(/^http:\/\//, 'https://'),
       licensed: true,
       secret: encrypt({
         refreshToken: ms.refresh_token,
         accessToken: mc.access_token,
-        expiresAt: Date.now() + mc.expires_in * 1000
+        expiresAt: Date.now() + mc.expires_in * 1000,
+        flow
       })
     }
   }
@@ -178,6 +180,7 @@ const notify = (event: MsLoginEvent): void => emit('account:login', event)
 
 export function cancelMicrosoftLogin(): void {
   loginGeneration++
+  external?.cancel()
   notify({ state: 'cancelled' })
 }
 
@@ -197,10 +200,35 @@ const BUILT_IN_CLIENT_ID = ''
 
 const microsoftClientId = (): string => getSettings().msClientId.trim() || BUILT_IN_CLIENT_ID
 
+export interface ExternalLogin {
+  signIn(progress: (message: string) => void): Promise<MsToken>
+  refresh(refreshToken: string): Promise<MsToken>
+  cancel(): void
+}
+
+const external: ExternalLogin | undefined = Object.values(
+  import.meta.glob<{ login?: ExternalLogin }>('./private/*.ts', { eager: true })
+).find((m) => m.login)?.login
+
+export const microsoftLoginAvailable = (): boolean => Boolean(microsoftClientId() || external)
+
+async function startExternalLogin(generation: number): Promise<void> {
+  const token = await external!.signIn((message) => notify({ state: 'working', message }))
+  if (generation !== loginGeneration) return
+  const { account } = await minecraftLogin(token, (message) => notify({ state: 'working', message }), 'external')
+  if (generation !== loginGeneration) return
+  upsert(account)
+  notify({ state: 'done', account: publicAccount(account) })
+}
+
 export async function startMicrosoftLogin(): Promise<void> {
   const generation = ++loginGeneration
   const clientId = microsoftClientId()
   try {
+    if (!clientId && external) {
+      await startExternalLogin(generation)
+      return
+    }
     if (!clientId) throw new Error('Сначала укажите Azure Client ID в настройках (раздел «Аккаунты»).')
     const device = await fetchJson<{
       device_code: string
@@ -248,6 +276,16 @@ export async function startMicrosoftLogin(): Promise<void> {
   }
 }
 
+export function setActiveSkin(skinUrl: string | undefined): AccountsState {
+  const s = load()
+  const account = s.accounts.find((a) => a.id === s.activeId)
+  if (account) {
+    account.skinUrl = skinUrl?.replace(/^http:\/\//, 'https://')
+    save(s)
+  }
+  return getAccounts()
+}
+
 export async function getLaunchAuth(): Promise<LaunchAuth> {
   const s = load()
   const account = s.accounts.find((a) => a.id === s.activeId)
@@ -259,16 +297,21 @@ export async function getLaunchAuth(): Promise<LaunchAuth> {
   let secret = decrypt(account.secret)
   if (Date.now() > secret.expiresAt - 60_000) {
     try {
-      const ms = await fetchJson<MsToken>(
-        `${AUTHORITY}/token`,
-        form({
-          client_id: microsoftClientId(),
-          grant_type: 'refresh_token',
-          refresh_token: secret.refreshToken,
-          scope: 'XboxLive.signin offline_access'
-        })
-      )
-      const { account: fresh } = await minecraftLogin(ms, () => {})
+      const flow = secret.flow === 'azure' || !secret.flow ? 'azure' : 'external'
+      if (flow === 'external' && !external) throw new Error('В этой сборке нет такого способа входа')
+      const ms =
+        flow === 'external'
+          ? await external!.refresh(secret.refreshToken)
+          : await fetchJson<MsToken>(
+              `${AUTHORITY}/token`,
+              form({
+                client_id: microsoftClientId(),
+                grant_type: 'refresh_token',
+                refresh_token: secret.refreshToken,
+                scope: 'XboxLive.signin offline_access'
+              })
+            )
+      const { account: fresh } = await minecraftLogin(ms, () => {}, flow)
       upsert(fresh)
       secret = decrypt(fresh.secret!)
       return { name: fresh.name, uuid: fresh.uuid, accessToken: secret.accessToken, userType: 'msa' }

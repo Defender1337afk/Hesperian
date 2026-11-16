@@ -36,7 +36,7 @@ export function FunHooks(): ReactNode {
       keys = [...keys, k].slice(-KONAMI.length)
       if (keys.join() === KONAMI.join()) {
         keys = []
-        const root = document.querySelector('.app, .crystal') ?? document.body
+        const root = document.querySelector('.app') ?? document.body
         root.classList.add('party')
         useStore.getState().toast('info', 'Режим вечеринки!')
         setTimeout(() => root.classList.remove('party'), 10000)

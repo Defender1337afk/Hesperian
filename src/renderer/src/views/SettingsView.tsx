@@ -1,21 +1,77 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { api } from '../bridge'
+import { api, onEvent } from '../bridge'
 import { Avatar, errorText, Range, Row, Seg, Switch } from '../components/common'
 import { useStore } from '../store'
-import { ACCENTS, applySettings, isCrystal, switchTheme, THEMES } from '../themes'
+import { ACCENTS, applySettings, switchTheme, THEMES, themeId } from '../themes'
 import { CURRENT, ROADMAP } from '../../../shared/release'
+import type { UpdateCheck, UpdateProgress } from '../../../shared/types'
+
+function UpdateButton(): ReactNode {
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [found, setFound] = useState<UpdateCheck | null>(null)
+  useEffect(
+    () =>
+      onEvent<UpdateProgress>('update:progress', (p) => {
+        if (p.stage === 'download') setText(p.total ? `Скачиваем: ${Math.round((p.done / p.total) * 100)}%` : 'Скачиваем…')
+        else setText(p.stage === 'install' ? 'Устанавливаем…' : 'Перезапускаем…')
+      }),
+    []
+  )
+  const check = (): void => {
+    setBusy(true)
+    setText('Проверяем…')
+    void api
+      .checkUpdate()
+      .then((r: UpdateCheck) => {
+        setFound(r.state === 'available' ? r : null)
+        setText(r.state === 'available' ? `Есть ${r.version}${r.codename ? ` ${r.codename}` : ''}` : r.state === 'offline' ? 'Нет связи с сервером обновлений' : 'У вас последняя версия')
+      })
+      .finally(() => setBusy(false))
+  }
+  const install = (): void => {
+    if (!found) return
+    if (!found.auto) {
+      void api.openExternal(found.url!)
+      return
+    }
+    setBusy(true)
+    api.installUpdate().catch((e: unknown) => {
+      setText(errorText(e))
+      setBusy(false)
+    })
+  }
+  return (
+    <div className="row">
+      {found ? (
+        <button className="btn sm primary" disabled={busy} onClick={install}>{found.auto ? 'Обновить' : 'Скачать'}</button>
+      ) : (
+        <button className="btn sm" disabled={busy} onClick={check}>Проверить обновления</button>
+      )}
+      {text && <small className="muted">{text}</small>}
+    </div>
+  )
+}
 
 function ThemeCard({ theme }: { theme: (typeof THEMES)[number] }): ReactNode {
-  const on = useStore((s) => s.settings?.theme === theme.id)
+  const on = useStore((s) => themeId(s.settings?.theme) === theme.id)
+  const bloom = theme.id === 'bloom'
   return (
     <button className={`theme-card ${on ? 'on' : ''}`} onClick={(e) => switchTheme(theme.id, e)}>
-      <span className={`tc-preview ${isCrystal(theme.id) ? 'tc-crystal' : ''}`} style={{ background: isCrystal(theme.id) ? undefined : theme.bg }}>
-        <span className="tc-side" style={{ background: isCrystal(theme.id) ? 'rgba(255, 255, 255, .12)' : theme.panel }} />
-        <span className="tc-lines">
-          <i style={{ background: isCrystal(theme.id) ? 'linear-gradient(90deg, #ffb84a, #ff3d8b)' : 'hsl(var(--accent-h) 55% 62%)', width: '38%' }} />
-          <i style={{ background: theme.fg, opacity: 0.45, width: '72%' }} />
-          <i style={{ background: theme.fg, opacity: 0.28, width: '54%' }} />
-        </span>
+      <span className={`tc-preview ${bloom ? 'tc-bloom' : ''}`} style={{ background: theme.bg }}>
+        <span className="tc-side" style={{ background: theme.panel, width: bloom ? 10 : undefined }} />
+        {bloom ? (
+          <span className="tc-bloom-body">
+            <i style={{ background: theme.fg, opacity: 0.8 }} />
+            <b style={{ background: theme.panel }}><em style={{ background: 'hsl(var(--accent-h) 55% 62%)' }} /></b>
+          </span>
+        ) : (
+          <span className="tc-lines">
+            <i style={{ background: 'hsl(var(--accent-h) 55% 62%)', width: '38%' }} />
+            <i style={{ background: theme.fg, opacity: 0.45, width: '72%' }} />
+            <i style={{ background: theme.fg, opacity: 0.28, width: '54%' }} />
+          </span>
+        )}
       </span>
       <span className="tc-name">{theme.name}</span>
     </button>
@@ -68,7 +124,7 @@ type SectionId = 'account' | 'appearance' | 'game' | 'data' | 'about'
 
 const NAV: [SectionId, string][] = [
   ['account', 'Аккаунт'],
-  ['appearance', 'Внешний вид'],
+  ['appearance', 'Интерфейс'],
   ['game', 'Игра'],
   ['data', 'Данные'],
   ['about', 'О программе']
@@ -136,24 +192,23 @@ export function SettingsView(): ReactNode {
         </section>
 
         <section ref={refs.appearance} className="rise" style={{ '--i': 1 } as React.CSSProperties}>
-          <h3>Внешний вид</h3>
+          <h3>Интерфейс</h3>
           <div className="theme-grid">{THEMES.map((t) => <ThemeCard theme={t} key={t.id} />)}</div>
-          {isCrystal(st.theme) && <Row title="Акцент и скругления" desc="Кристалл задаёт их сам: стекло и градиент янтарь, томат, ягода" />}
-          {!isCrystal(st.theme) && <Row title="Акцент">
+          <Row title="Акцент">
             <div className="accents">
               {ACCENTS.map((hue) => (
                 <button key={hue} className={`accent-sw ${st.accentHue === hue ? 'on' : ''}`} style={{ background: `hsl(${hue} 55% 60%)` }} aria-label={`Оттенок ${hue}`} onClick={() => void set({ accentHue: hue })} />
               ))}
             </div>
-          </Row>}
-          {!isCrystal(st.theme) && <Row title="Свой оттенок"><Range value={st.accentHue} min={0} max={359} fmt={(v) => `${v}°`} onChange={(accentHue) => void set({ accentHue })} /></Row>}
+          </Row>
+          <Row title="Свой оттенок"><Range value={st.accentHue} min={0} max={359} fmt={(v) => `${v}°`} onChange={(accentHue) => void set({ accentHue })} /></Row>
           <Row title="Big Picture при запуске" desc="Лаунчер сразу открывается на весь экран. Вручную включается клавишей F11">
             <Switch on={st.bigPictureOnStart} onChange={(v) => set({ bigPictureOnStart: v })} label="Big Picture при запуске" />
           </Row>
           <Row title="Плотность">
             <Seg value={st.density} options={[['compact', 'Компактно'], ['comfortable', 'Обычно'], ['spacious', 'Просторно']]} onChange={(density) => void set({ density })} />
           </Row>
-          {!isCrystal(st.theme) && <Row title="Скругления"><Range value={st.radius} min={0} max={16} fmt={(v) => `${v} px`} onChange={(radius) => void set({ radius })} /></Row>}
+          <Row title="Скругления"><Range value={st.radius} min={0} max={16} fmt={(v) => `${v} px`} onChange={(radius) => void set({ radius })} /></Row>
           <Row title="Размер интерфейса"><Range value={st.uiSize} min={11} max={16} fmt={(v) => `${v} px`} onChange={(uiSize) => void set({ uiSize })} /></Row>
           <Row title="Анимации" desc="Плавные переходы и смена темы кругом от курсора"><Switch on={st.animations} label="Анимации" onChange={(animations) => void set({ animations })} /></Row>
           <Row title="Фоновое изображение" desc="Показывается за содержимым вкладок">
@@ -248,6 +303,7 @@ export function SettingsView(): ReactNode {
             <b className="about-codename">{CURRENT.codename}</b>
             <small className="muted">Кодовое имя выпуска {CURRENT.version}. GPL-3.0, интерфейс основан на Sprout IDE.</small>
             <button className="btn sm" onClick={() => useStore.setState({ whatsNewOpen: true })}>Что нового</button>
+            <UpdateButton />
           </div>
           <div className="roadmap">
             {ROADMAP.map((r) => (

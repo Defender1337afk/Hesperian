@@ -20,7 +20,7 @@ import * as modrinth from './modrinth'
 import * as updates from './updates'
 import * as servers from './servers'
 import * as skins from './skins'
-import { checkUpdate } from './update'
+import { checkUpdate, installUpdate } from './update'
 import { restoreWindow, unloadWindow } from './window'
 import { optimizeInstance } from './optimize'
 import { updateLocalMods } from './localmods'
@@ -122,6 +122,7 @@ export const api = {
 
   optimizeInstance,
   checkUpdate,
+  installUpdate,
   microsoftLoginAvailable: async () => accounts.microsoftLoginAvailable(),
   skinProfile: skins.skinProfile,
   uploadSkin: skins.uploadSkin,

@@ -8,6 +8,7 @@ import { anyRunning } from './minecraft/launch'
 import { stopAllServers } from './servers'
 import { setWindowFactory } from './window'
 import { allowSkinWebviews, watchSkinBrowser } from './skins'
+import { cleanupUpdate } from './update'
 
 const hidden = process.env.HESPERIAN_HIDDEN === '1'
 
@@ -92,6 +93,7 @@ if (!app.requestSingleInstanceLock()) {
     setWindowFactory(createWindow)
     watchSkinBrowser()
     createWindow()
+    void cleanupUpdate()
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })

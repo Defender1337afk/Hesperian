@@ -207,6 +207,12 @@ namespace Hesperian.Setup
             Process.Start(new ProcessStartInfo("cmd.exe", script) { CreateNoWindow = true, UseShellExecute = false, WindowStyle = ProcessWindowStyle.Hidden });
         }
 
+        public static void ScheduleFileRemoval(string file)
+        {
+            var script = $"/c ping -n 4 127.0.0.1 >nul & del /f /q \"{file}\"";
+            Process.Start(new ProcessStartInfo("cmd.exe", script) { CreateNoWindow = true, UseShellExecute = false, WindowStyle = ProcessWindowStyle.Hidden });
+        }
+
         public static void LaunchApp(string dir) =>
             Process.Start(new ProcessStartInfo(Path.Combine(dir, AppExe)) { WorkingDirectory = dir, UseShellExecute = true });
 
@@ -220,6 +226,18 @@ namespace Hesperian.Setup
         {
             foreach (var dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories).OrderByDescending(d => d.Length))
                 if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+        }
+
+        public static bool HasShortcut(Environment.SpecialFolder folder) => File.Exists(ShortcutPath(folder));
+
+        public static bool WaitForExit(string dir, int seconds)
+        {
+            for (int i = 0; i < seconds * 4; i++)
+            {
+                if (!IsAppRunning(dir)) return true;
+                System.Threading.Thread.Sleep(250);
+            }
+            return !IsAppRunning(dir);
         }
 
         static string ShortcutPath(Environment.SpecialFolder folder) =>

@@ -15,7 +15,7 @@ const SHORTCUTS: [string, string][] = [
 const rise = (i: number): React.CSSProperties => ({ '--i': i }) as React.CSSProperties
 
 let taps: number[] = []
-const secret = (): void => {
+export const secret = (): void => {
   const now = Date.now()
   taps = [...taps.filter((t) => now - t < 900), now]
   if (taps.length >= 3) {

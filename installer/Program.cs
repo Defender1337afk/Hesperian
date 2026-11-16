@@ -34,6 +34,33 @@ namespace Hesperian.Setup
                 return 0;
             }
 
+            if (args.Contains("--update") && !uninstall)
+            {
+                options.Desktop = Engine.HasShortcut(Environment.SpecialFolder.DesktopDirectory);
+                options.StartMenu = Engine.HasShortcut(Environment.SpecialFolder.Programs);
+                for (int attempt = 0; ; attempt++)
+                {
+                    try
+                    {
+                        Engine.WaitForExit(options.Dir, 60);
+                        Engine.Install(options, (_, __) => { });
+                        break;
+                    }
+                    catch (Exception e) when (attempt < 5 && (e is IOException || e is UnauthorizedAccessException || e is InvalidOperationException))
+                    {
+                        System.Threading.Thread.Sleep(1500);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show("Не удалось установить обновление: " + e.Message + "\nСкачайте новую версию с сайта.", "Hesperian", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return 1;
+                    }
+                }
+                Engine.LaunchApp(options.Dir);
+                Engine.ScheduleFileRemoval(Engine.SelfPath);
+                return 0;
+            }
+
             if (silent)
             {
                 try

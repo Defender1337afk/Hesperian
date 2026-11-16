@@ -23,6 +23,7 @@ export const I = {
   stop: (p: IconProps) => <S {...p}><rect x="5" y="5" width="10" height="10" rx="2" fill="currentColor" stroke="none" /></S>,
   settings: (p: IconProps) => <S {...p}><circle cx="10" cy="10" r="2.6" /><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" /></S>,
   user: (p: IconProps) => <S {...p}><circle cx="10" cy="7" r="3" /><path d="M4 16.5c.8-2.9 3.2-4.5 6-4.5s5.2 1.6 6 4.5" /></S>,
+  clock: (p: IconProps) => <S {...p}><circle cx="10" cy="10" r="7" /><path d="M10 6v4.2l2.8 1.8" /></S>,
   terminal: (p: IconProps) => <S {...p}><rect x="2.5" y="3.5" width="15" height="13" rx="2.5" /><path d="m6 8 2.5 2L6 12M10.5 12.5H14" /></S>,
   folder: (p: IconProps) => <S {...p}><path d="M2.8 6A1.5 1.5 0 0 1 4.3 4.5h3.4l1.8 1.8h6.2a1.5 1.5 0 0 1 1.5 1.5v6.7a1.5 1.5 0 0 1-1.5 1.5H4.3a1.5 1.5 0 0 1-1.5-1.5z" /></S>,
   folderOpen: (p: IconProps) => <S {...p}><path d="M2.8 14.5V6a1.5 1.5 0 0 1 1.5-1.5h3.4l1.8 1.8h5a1.5 1.5 0 0 1 1.5 1.5v1" /><path d="M2.8 14.5 5 9.3a1.5 1.5 0 0 1 1.4-.9h10.2a.8.8 0 0 1 .7 1.1l-2 5a1.5 1.5 0 0 1-1.4 1H4.2a1.4 1.4 0 0 1-1.4-1z" /></S>,

@@ -8,8 +8,6 @@
 .tab.active > svg { color: var(--accent); }
 .log-warn { color: var(--git-mod, #d9a441); }
 .log > div { animation: fadeIn .15s; }
-[data-theme="paper"] .log-warn { color: #8a6100; }
-[data-theme="paper"] .log-err { color: #b5302a; }
 .menu-danger .mi-label, .menu-danger .mi-check { color: #e5736d; }
 .avatar-skin { position: relative; overflow: visible; background: transparent; border-radius: 6px; }
 .avatar-skin i { position: absolute; inset: 0; border-radius: 4px; background-repeat: no-repeat; image-rendering: pixelated; }
@@ -110,7 +108,6 @@
 .gallery figcaption { padding-top: 5px; }
 
 .theme-grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
-.tc-crystal { background: radial-gradient(circle at 10% 0, #ff633d, transparent 60%), radial-gradient(circle at 100% 100%, #ffb84a, transparent 55%), radial-gradient(circle at 95% 5%, #9b3dff, transparent 55%), #100c1a; }
 
 .dialog .field > span { display: block; }
 .new-version, .new-names { align-items: flex-start; gap: 12px; }

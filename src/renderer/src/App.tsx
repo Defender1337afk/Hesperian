@@ -1,6 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
 import { BigPicture } from './components/BigPicture'
-import { CrystalShell } from './components/CrystalShell'
 import { AccountMenu, ConfirmDialog, LoginDialog, Menu, NewInstanceDialog, Palette, PromptDialog, Toasts } from './components/Overlays'
 import { BottomPanel, Rail, Sidebar, StatusBar, TabBar, TitleBar } from './components/Shell'
 import { useStore } from './store'
@@ -8,7 +7,7 @@ import { WhatsNew } from './components/WhatsNew'
 import { Clawd } from './components/Clawd'
 import { FunHooks } from './components/Fun'
 import { releaseName } from '../../shared/release'
-import { isCrystal } from './themes'
+import { isBloom } from './themes'
 import { ActiveView } from './views/ActiveView'
 
 function onKey(e: KeyboardEvent): void {
@@ -67,6 +66,12 @@ export function App(): ReactNode {
   const background = useStore((s) => s.settings?.backgroundImage)
   const opacity = useStore((s) => s.settings?.backgroundOpacity ?? 15)
 
+  const bloom = isBloom(theme)
+
+  useEffect(() => {
+    if (bloom) useStore.setState({ sidebar: null })
+  }, [bloom])
+
   useEffect(() => {
     document.title = releaseName()
     void useStore.getState().init()
@@ -76,24 +81,15 @@ export function App(): ReactNode {
 
   if (!ready) return null
 
-  if (isCrystal(theme)) {
-    return (
-      <>
-        <CrystalShell />
-        <Overlays />
-      </>
-    )
-  }
-
   return (
-    <div className={`app ${maximized ? 'maxed' : ''}`}>
+    <div className={`app ${maximized ? 'maxed' : ''} ${bloom ? 'bloom' : ''}`}>
       <TitleBar />
       <div className="body">
         <Rail />
         <Sidebar />
         <div className="center">
           <main className="main">
-            <TabBar />
+            {!bloom && <TabBar />}
             <div className="content">
               {background && <div className="content-bg" style={{ backgroundImage: `url(${background})`, opacity: opacity / 100 }} />}
               <ActiveView />

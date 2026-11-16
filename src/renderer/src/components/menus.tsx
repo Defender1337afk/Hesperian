@@ -93,6 +93,6 @@ export function commands(): MenuEntry[] {
     { label: 'Серверы', run: () => s.openServers() },
     { label: 'Скины', run: () => s.openSkins() },
     { label: 'Что нового', run: () => useStore.setState({ whatsNewOpen: true }) },
-    ...THEMES.map((t) => ({ label: `Тема: ${t.name}`, run: () => switchTheme(t.id) }))
+    ...THEMES.map((t) => ({ label: `Интерфейс: ${t.name}`, run: () => switchTheme(t.id) }))
   ]
 }

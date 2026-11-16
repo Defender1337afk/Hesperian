@@ -7,6 +7,7 @@ import { I } from './icons'
 import { instanceMenu, menuItems } from './menus'
 import { StorePanel } from './StorePanel'
 import { releaseName } from '../../../shared/release'
+import { isBloom } from '../themes'
 
 const MENUS: [string, string][] = [['file', 'Файл'], ['view', 'Вид'], ['game', 'Игра'], ['help', 'Справка']]
 const RAIL: [SidebarKind, (p: { size?: number }) => ReactNode, string][] = [
@@ -30,7 +31,7 @@ export function TitleBar(): ReactNode {
   return (
     <header className="titlebar">
       <div className="tb-left">
-        <span className="wordmark"><I.apple size={16} /></span>
+        <button className="wordmark" title="Главная" onClick={() => useStore.getState().openWelcome()}><I.apple size={16} /></button>
         <nav className="menubar">
           {MENUS.map(([key, label]) => (
             <button
@@ -82,12 +83,22 @@ export function Rail(): ReactNode {
   const serversActive = useStore((s) => s.activeTabId === 'servers')
   const openSkins = useStore((s) => s.openSkins)
   const skinsActive = useStore((s) => s.activeTabId === 'skins')
-  const index = RAIL.findIndex(([k]) => k === sidebar)
+  const bloom = useStore((s) => isBloom(s.settings?.theme))
+  const homeActive = useStore((s) => s.activeTabId === 'welcome' || Boolean(s.activeTabId?.startsWith('instance:')))
+  const openWelcome = useStore((s) => s.openWelcome)
+  const press = (key: SidebarKind): void => {
+    if (bloom && key === 'instances') {
+      useStore.setState({ sidebar: null })
+      openWelcome()
+    } else toggleRail(key)
+  }
+  const isOn = (key: SidebarKind): boolean => (bloom && key === 'instances' ? homeActive && sidebar !== 'store' : sidebar === key)
+  const index = RAIL.findIndex(([k]) => isOn(k))
   return (
     <aside className="rail">
       <span className="rail-ind" style={{ transform: `translateY(${Math.max(index, 0) * RAIL_STEP}px)`, opacity: index >= 0 ? 1 : 0 }} />
       {RAIL.map(([key, icon, title]) => (
-        <IconBtn key={key} icon={icon} title={title} active={sidebar === key} onClick={() => toggleRail(key)} />
+        <IconBtn key={key} icon={icon} title={bloom && key === 'instances' ? 'Главная' : title} active={isOn(key)} onClick={() => press(key)} />
       ))}
       <IconBtn icon={I.globe} title="Серверы" active={serversActive} onClick={openServers} />
       <IconBtn icon={I.shirt} title="Скины" active={skinsActive} onClick={openSkins} />

@@ -273,6 +273,8 @@ export interface SkinLibraryItem {
   data: string
 }
 
+export type UpdateKind = 'win-setup' | 'win-portable' | 'linux-appimage' | 'linux-tar'
+
 export interface UpdateCheck {
   state: 'none' | 'available' | 'offline'
   current: string
@@ -280,4 +282,12 @@ export interface UpdateCheck {
   codename?: string
   notes?: string
   url?: string
+  auto?: boolean
+  size?: number
+}
+
+export interface UpdateProgress {
+  stage: 'download' | 'install' | 'restart'
+  done: number
+  total: number
 }

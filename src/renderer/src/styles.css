@@ -25,33 +25,6 @@
   --shadow: 0 16px 40px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .3);
   color-scheme: dark;
 }
-[data-theme="midnight"] {
-  --bg: #0a0d12; --panel: #0d1118; --raised: #141924; --raised-2: #1a2030; --input: #090c11;
-  --line: rgba(200, 215, 255, .065); --line-strong: rgba(200, 215, 255, .12);
-  --text: #dfe5ef; --muted: #8590a3; --faint: #535c6e; --hover: rgba(200, 215, 255, .045);
-  --editor-bg: #0a0d12; --gutter: #3c4456;
-  --accent: hsl(var(--accent-h) 60% 66%); --on-accent: hsl(var(--accent-h) 60% 10%); --accent-soft: hsl(var(--accent-h) 60% 62% / .12);
-  --shadow: 0 16px 40px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .3);
-  color-scheme: dark;
-}
-[data-theme="graphite"] {
-  --bg: #111112; --panel: #141415; --raised: #1b1b1d; --raised-2: #222225; --input: #0f0f10;
-  --line: rgba(255, 255, 255, .065); --line-strong: rgba(255, 255, 255, .12);
-  --text: #ebebeb; --muted: #97979b; --faint: #5f5f64; --hover: rgba(255, 255, 255, .045);
-  --editor-bg: #111112; --gutter: #444448;
-  --accent: hsl(var(--accent-h) 55% 64%); --on-accent: hsl(var(--accent-h) 50% 9%); --accent-soft: hsl(var(--accent-h) 50% 60% / .12);
-  --shadow: 0 16px 40px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .3);
-  color-scheme: dark;
-}
-[data-theme="paper"] {
-  --bg: #f5f3ee; --panel: #efece6; --raised: #ffffff; --raised-2: #e8e4dc; --input: #ffffff;
-  --line: rgba(40, 35, 20, .08); --line-strong: rgba(40, 35, 20, .15);
-  --text: #22241f; --muted: #6c6b62; --faint: #a3a094; --hover: rgba(40, 35, 20, .045);
-  --editor-bg: #faf9f6; --gutter: #c2beb2;
-  --accent: hsl(var(--accent-h) 50% 34%); --on-accent: #ffffff; --accent-soft: hsl(var(--accent-h) 50% 40% / .1);
-  --shadow: 0 16px 40px rgba(60, 50, 20, .14), 0 1px 3px rgba(60, 50, 20, .08);
-  color-scheme: light;
-}
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
@@ -346,7 +319,6 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .stars button.on svg path { fill: currentColor; }
 .stars:not(.disabled) button:hover { transform: scale(1.2); }
 .scrim { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .32); animation: fadeIn .14s; }
-[data-theme="paper"] .scrim { background: rgba(40, 35, 20, .18); }
 .scrim.top { align-items: flex-start; padding-top: 64px; background: rgba(0, 0, 0, .18); }
 .palette { width: min(600px, 90vw); background: var(--raised); border: 1px solid var(--line-strong); border-radius: calc(var(--radius) + 4px); box-shadow: var(--shadow); overflow: hidden; animation: drop .18s var(--ease); }
 @keyframes drop { from { opacity: 0; transform: translateY(-8px) scale(.985); } }

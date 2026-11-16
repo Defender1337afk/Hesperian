@@ -35,6 +35,20 @@
       .boot-actions button { height: 40px; padding: 0 22px; border-radius: 20px; border: 1px solid rgba(220, 255, 230, 0.14); background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer; transition: transform 0.15s, border-radius 0.25s; }
       .boot-actions button:hover { border-radius: 12px; }
       .boot-actions .primary { background: #7fd6a2; color: #0c1a12; border-color: transparent; }
+      .boot-progress { display: none; margin: 2px 0 12px; }
+      #boot.updating .boot-progress { display: block; }
+      .boot-pct { display: flex; align-items: baseline; justify-content: center; gap: 2px; margin: 0 0 8px; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; color: #eaf5ee; }
+      .boot-pct small { font-size: 18px; font-weight: 600; color: #7fd6a2; letter-spacing: 0; text-transform: none; }
+      .boot-wave { display: block; width: 100%; height: 18px; overflow: visible; }
+      .boot-wave .track { stroke: rgba(127, 214, 162, 0.22); stroke-width: 4; stroke-linecap: round; fill: none; }
+      .boot-wave .stop { fill: #7fd6a2; }
+      .boot-wave .active { stroke: #7fd6a2; stroke-width: 4; stroke-linecap: round; fill: none; animation: boot-wave 1s linear infinite; }
+      #boot.installing .boot-wave .active { animation-duration: 0.45s; }
+      @keyframes boot-wave { to { transform: translateX(-24px); } }
+      #boot.updating .boot-actions { display: none; }
+      .boot-status { display: none; margin: 0; color: #9fb1a5; font-size: 12px; font-variant-numeric: tabular-nums; }
+      #boot.updating .boot-status { display: block; }
+      .boot-error { color: #f2a7a7 !important; }
       @keyframes boot-card { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
       @media (prefers-reduced-motion: reduce) { .boot-cookie svg, .boot-cookie img { animation: none; } #root.reveal { animation-duration: 0.01s; } }
     </style>
@@ -50,6 +64,16 @@
         <small>Доступно обновление</small>
         <h1 id="boot-title"></h1>
         <p id="boot-notes"></p>
+        <div class="boot-progress">
+          <div class="boot-pct"><span id="boot-pct">0</span><small>%</small></div>
+          <svg class="boot-wave" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true">
+            <defs><clipPath id="boot-clip"><rect id="boot-clip-rect" x="0" y="0" width="0" height="18" /></clipPath></defs>
+            <line id="boot-track" class="track" x1="8" y1="9" x2="292" y2="9" />
+            <circle class="stop" cx="296" cy="9" r="2" />
+            <g clip-path="url(#boot-clip)"><path class="active" d="" id="boot-wave" /></g>
+          </svg>
+        </div>
+        <p class="boot-status" id="boot-status"></p>
         <div class="boot-actions"><button id="boot-later">Позже</button><button id="boot-get" class="primary">Скачать</button></div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Instance } from '../../../shared/types'
 import { api } from '../bridge'
 import { useStore, type SidebarKind } from '../store'
-import { Avatar, describeInstance, formatBytes, IconBtn, RunButton } from './common'
+import { Avatar, describeInstance, formatBytes, IconBtn } from './common'
 import { I } from './icons'
 import { instanceMenu, menuItems } from './menus'
 import { StorePanel } from './StorePanel'
@@ -60,7 +60,7 @@ export function TitleBar(): ReactNode {
             <I.user size={15} /> Войти
           </button>
         )}
-        {selected && <RunButton instanceId={selected.id} />}
+        <TodayPill />
         <div className="win-ctl">
           <button onClick={() => void api.winMinimize()} title="Свернуть"><I.minus size={15} /></button>
           <button onClick={() => void api.winMaximize()} title={maximized ? 'Восстановить' : 'Развернуть'}>
@@ -73,14 +73,60 @@ export function TitleBar(): ReactNode {
   )
 }
 
+const clock = (sec: number): string => {
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  return h ? `${h} ч ${m} мин` : `${m} мин`
+}
+
+function TodayPill(): ReactNode {
+  const games = useStore((s) => s.games)
+  const selected = useStore((s) => s.selectedId)
+  const openInstance = useStore((s) => s.openInstance)
+  const [data, setData] = useState<{ sec: number; playing: { id: string; name: string; startedAt: number }[] } | null>(null)
+  const [now, setNow] = useState(Date.now())
+  const runningKey = Object.entries(games).filter(([, v]) => v === 'running').map(([k]) => k).join(',')
+  useEffect(() => {
+    let alive = true
+    const load = (): void => void api.todayPlaytime().then((d: typeof data) => alive && setData(d)).catch(() => {})
+    load()
+    const t = setInterval(load, 60000)
+    return () => {
+      alive = false
+      clearInterval(t)
+    }
+  }, [runningKey])
+  const playing = data?.playing ?? []
+  useEffect(() => {
+    if (!playing.length) return
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [playing.length])
+  if (!data) return null
+  const live = playing[0]
+  const liveSec = live ? Math.round((now - live.startedAt) / 1000) : 0
+  const total = data.sec + playing.reduce((a, p) => a + Math.round((now - p.startedAt) / 1000), 0)
+  return (
+    <button
+      className={`today-pill ${live ? 'live' : ''}`}
+      title={live ? `${live.name}: идёт игра` : 'Время в игре за сегодня по всем сборкам'}
+      onClick={() => {
+        const id = live?.id ?? selected
+        if (id) openInstance(id)
+      }}
+    >
+      {live ? <span className="pulse" /> : <I.clock size={13} />}
+      <span>{live ? `${live.name} · ${clock(liveSec)}` : total >= 60 ? `Сегодня ${clock(total)}` : 'Сегодня ещё не играли'}</span>
+    </button>
+  )
+}
+
 export function Rail(): ReactNode {
   const sidebar = useStore((s) => s.sidebar)
   const panelOpen = useStore((s) => s.panelOpen)
   const settingsActive = useStore((s) => s.activeTabId === 'settings')
   const toggleRail = useStore((s) => s.toggleRail)
   const openSettings = useStore((s) => s.openSettings)
-  const openServers = useStore((s) => s.openServers)
-  const serversActive = useStore((s) => s.activeTabId === 'servers')
   const openSkins = useStore((s) => s.openSkins)
   const skinsActive = useStore((s) => s.activeTabId === 'skins')
   const bloom = useStore((s) => isBloom(s.settings?.theme))
@@ -100,7 +146,6 @@ export function Rail(): ReactNode {
       {RAIL.map(([key, icon, title]) => (
         <IconBtn key={key} icon={icon} title={bloom && key === 'instances' ? 'Главная' : title} active={isOn(key)} onClick={() => press(key)} />
       ))}
-      <IconBtn icon={I.globe} title="Серверы" active={serversActive} onClick={openServers} />
       <IconBtn icon={I.shirt} title="Скины" active={skinsActive} onClick={openSkins} />
       <div className="rail-spacer" />
       <IconBtn icon={I.terminal} title="Вывод игры (Ctrl+`)" active={panelOpen} onClick={() => useStore.setState({ panelOpen: !panelOpen })} />
@@ -126,7 +171,7 @@ function InstanceRow({ instance, depth }: { instance: Instance; depth: number })
       }}
     >
       <span className="fdot" style={{ background: instance.color }} />
-      <span className="tree-name">{instance.name}</span>
+      <span className="tree-name">{instance.name}{instance.pinned && <I.star size={10} />}</span>
       {state === 'running' || state === 'launching' ? <span className="pulse tree-right" /> : <span className="tree-right tree-ver">{instance.mcVersion}</span>}
     </div>
   )
@@ -141,6 +186,7 @@ function InstancesPanel(): ReactNode {
       const key = instance.group?.trim() || ''
       map.set(key, [...(map.get(key) ?? []), instance])
     }
+    for (const list of map.values()) list.sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)))
     return [...map.entries()].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b, 'ru')))
   }, [instances])
 
@@ -357,7 +403,7 @@ export function StatusBar(): ReactNode {
   return (
     <footer className="statusbar">
       <button className="sb-item btnlike" onClick={() => useStore.setState({ accountOpen: true })}>
-        <I.user size={12} /> {account ? `${account.name} · ${account.licensed ? 'лицензия' : 'офлайн'}` : 'Нет аккаунта'}
+        <I.user size={12} /> {account ? <><span className="sensitive">{account.name}</span> · {account.licensed ? 'лицензия' : 'офлайн'}</> : 'Нет аккаунта'}
       </button>
       {task && (
         <span className="sb-item live sb-task">

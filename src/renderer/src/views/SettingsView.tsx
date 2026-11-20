@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { api, onEvent } from '../bridge'
 import { Avatar, errorText, Range, Row, Seg, Switch } from '../components/common'
 import { useStore } from '../store'
-import { ACCENTS, applySettings, switchTheme, THEMES, themeId } from '../themes'
+import { ACCENTS, applySettings, GRADIENTS, gradientCss, switchTheme, THEMES, themeId } from '../themes'
 import { CURRENT, ROADMAP } from '../../../shared/release'
+import { hueFromImage } from '../components/Aether'
 import type { UpdateCheck, UpdateProgress } from '../../../shared/types'
 
 function UpdateButton(): ReactNode {
@@ -174,7 +175,7 @@ export function SettingsView(): ReactNode {
             <div className="account-card" key={account.id}>
               <Avatar account={account} size={44} />
               <div className="grow">
-                <b>{account.name}</b>
+                <b className="sensitive">{account.name}</b>
                 <small>{account.licensed ? 'Лицензия подтверждена' : 'Офлайн-профиль'}</small>
               </div>
               {account.id === activeId ? <span className="role">активен</span> : <button className="btn" onClick={() => void api.setActiveAccount(account.id).then(setAccounts)}>Выбрать</button>}
@@ -186,22 +187,40 @@ export function SettingsView(): ReactNode {
               <button className="btn primary" onClick={() => useStore.setState({ accountOpen: true })}>Добавить</button>
             </div>
           )}
-          <Row title="Azure Client ID" desc="ID приложения Azure для входа через Microsoft. Как его получить, написано в README.">
-            <TextSetting value={st.msClientId} mono placeholder="00000000-0000-0000-0000-000000000000" onSave={(v) => void set({ msClientId: v.trim() })} />
-          </Row>
         </section>
 
         <section ref={refs.appearance} className="rise" style={{ '--i': 1 } as React.CSSProperties}>
           <h3>Интерфейс</h3>
           <div className="theme-grid">{THEMES.map((t) => <ThemeCard theme={t} key={t.id} />)}</div>
+          <Row title="Оформление" desc="Работает и в Legacy, и в New">
+            <Seg value={st.appearance ?? 'dark'} options={[['dark', 'Тёмное'], ['light', 'Светлое'], ['black', 'Чёрное'], ['system', 'Как в системе']]} onChange={(appearance) => void set({ appearance })} />
+          </Row>
           <Row title="Акцент">
             <div className="accents">
               {ACCENTS.map((hue) => (
-                <button key={hue} className={`accent-sw ${st.accentHue === hue ? 'on' : ''}`} style={{ background: `hsl(${hue} 55% 60%)` }} aria-label={`Оттенок ${hue}`} onClick={() => void set({ accentHue: hue })} />
+                <button key={hue} className={`accent-sw ${(st.accentMode ?? 'hue') === 'hue' && st.accentHue === hue ? 'on' : ''}`} style={{ background: `hsl(${hue} 55% 60%)` }} aria-label={`Оттенок ${hue}`} onClick={() => void set({ accentHue: hue, accentMode: 'hue' })} />
+              ))}
+              <span className="accents-sep" />
+              <button className={`accent-sw mono white ${st.accentMode === 'white' ? 'on' : ''}`} aria-label="Белый" title="Белый" onClick={() => void set({ accentMode: 'white' })} />
+              <button className={`accent-sw mono black ${st.accentMode === 'black' ? 'on' : ''}`} aria-label="Чёрный" title="Чёрный" onClick={() => void set({ accentMode: 'black' })} />
+            </div>
+          </Row>
+          <Row title="Градиент" desc="Кнопки, переключатели и полоски переливаются">
+            <div className="accents">
+              {GRADIENTS.map((g) => (
+                <button key={g.id} className={`accent-sw grad ${st.accentMode === 'gradient' && st.accentGradient === g.id ? 'on' : ''}`} style={{ background: gradientCss(g.stops) }} aria-label={g.name} title={g.name} onClick={() => void set({ accentMode: 'gradient', accentGradient: g.id })} />
               ))}
             </div>
           </Row>
-          <Row title="Свой оттенок"><Range value={st.accentHue} min={0} max={359} fmt={(v) => `${v}°`} onChange={(accentHue) => void set({ accentHue })} /></Row>
+          <Row title="Иконки модов" desc="В списках модов, на главной и в магазине">
+            <Seg value={st.iconStyle ?? 'original'} options={[['original', 'Оригинал'], ['accent', 'В цвет акцента'], ['mono', 'Монохром']]} onChange={(iconStyle) => void set({ iconStyle })} />
+          </Row>
+          {(st.accentMode ?? 'hue') === 'hue' && <Row title="Свой оттенок"><Range value={st.accentHue} min={0} max={359} fmt={(v) => `${v}°`} onChange={(accentHue) => void set({ accentHue })} /></Row>}
+          <Row title="Сворачивать в трей" desc="Крестик прячет окно в трей, оттуда же можно сразу запустить последние сборки"><Switch on={Boolean(st.minimizeToTray)} label="Трей" onChange={(minimizeToTray) => void set({ minimizeToTray })} /></Row>
+          <Row title="Напоминать о перерыве" desc="Уведомление во время игры">
+            <Seg value={st.breakReminderMin ?? 0} options={[[0, 'Выкл'], [30, '30 мин'], [60, '1 ч'], [90, '1,5 ч'], [120, '2 ч']]} onChange={(breakReminderMin) => void set({ breakReminderMin })} />
+          </Row>
+          <Row title="Режим стримера" desc="Размывает ник, IP-адреса и адреса серверов друзей"><Switch on={Boolean(st.streamerMode)} label="Режим стримера" onChange={(streamerMode) => void set({ streamerMode })} /></Row>
           <Row title="Big Picture при запуске" desc="Лаунчер сразу открывается на весь экран. Вручную включается клавишей F11">
             <Switch on={st.bigPictureOnStart} onChange={(v) => set({ bigPictureOnStart: v })} label="Big Picture при запуске" />
           </Row>
@@ -211,7 +230,7 @@ export function SettingsView(): ReactNode {
           <Row title="Скругления"><Range value={st.radius} min={0} max={16} fmt={(v) => `${v} px`} onChange={(radius) => void set({ radius })} /></Row>
           <Row title="Размер интерфейса"><Range value={st.uiSize} min={11} max={16} fmt={(v) => `${v} px`} onChange={(uiSize) => void set({ uiSize })} /></Row>
           <Row title="Анимации" desc="Плавные переходы и смена темы кругом от курсора"><Switch on={st.animations} label="Анимации" onChange={(animations) => void set({ animations })} /></Row>
-          <Row title="Фоновое изображение" desc="Показывается за содержимым вкладок">
+          <Row title="Фон" desc="Картинка, GIF или видео без звука за содержимым вкладок. Можно перетащить файл прямо в окно">
             <div className="row">
               <button
                 className="btn"
@@ -226,11 +245,28 @@ export function SettingsView(): ReactNode {
               >
                 Выбрать
               </button>
-              {st.backgroundImage && <button className="btn" onClick={() => void set({ backgroundImage: '' })}>Убрать</button>}
+              {st.backgroundImage && (
+                <button
+                  className="btn"
+                  title="Подобрать цвет акцента под фон"
+                  onClick={() => {
+                    void hueFromImage(st.backgroundImage)
+                      .then((accentHue) => (accentHue === null ? toast('warn', 'В фоне нет ярких цветов') : set({ accentHue, accentMode: 'hue' })))
+                      .catch(() => toast('warn', 'Не удалось прочитать фон'))
+                  }}
+                >
+                  Цвет из фона
+                </button>
+              )}
+              {st.backgroundImage && <button className="btn" onClick={() => void api.clearBackground().then((next: typeof st) => useStore.setState({ settings: next }))}>Убрать</button>}
             </div>
           </Row>
           {st.backgroundImage && (
-            <Row title="Заметность фона"><Range value={st.backgroundOpacity} min={3} max={60} fmt={(v) => `${v}%`} onChange={(backgroundOpacity) => void set({ backgroundOpacity })} /></Row>
+            <>
+              <Row title="Заметность фона"><Range value={st.backgroundOpacity} min={3} max={80} fmt={(v) => `${v}%`} onChange={(backgroundOpacity) => void set({ backgroundOpacity })} /></Row>
+              <Row title="Подгонка фона"><Seg value={st.backgroundFit ?? 'cover'} options={[['cover', 'Заполнить'], ['contain', 'Вписать целиком']]} onChange={(backgroundFit) => void set({ backgroundFit })} /></Row>
+              <Row title="Размытие фона"><Range value={st.backgroundBlur ?? 0} min={0} max={30} fmt={(v) => (v ? `${v} px` : 'нет')} onChange={(backgroundBlur) => void set({ backgroundBlur })} /></Row>
+            </>
           )}
           <div className="set-row set-row-col">
             <div className="set-text">
@@ -252,6 +288,9 @@ export function SettingsView(): ReactNode {
               <span className="muted">×</span>
               <NumberSetting value={st.defaultHeight} min={240} max={4320} onSave={(defaultHeight) => void set({ defaultHeight })} />
             </div>
+          </Row>
+          <Row title="Кэш классов Java" desc="Для Minecraft 1.20.5 и новее. Первый запуск дольше примерно на 10 секунд, зато потом игра стартует быстрее. Занимает около 100 МБ на сборку">
+            <Switch on={Boolean(st.classCache)} label="Кэш классов" onChange={(classCache) => void set({ classCache })} />
           </Row>
           <Row title="Аргументы JVM" desc="Добавляются ко всем сборкам">
             <TextSetting value={st.defaultJvmArgs} mono placeholder="-XX:+UseG1GC" onSave={(defaultJvmArgs) => void set({ defaultJvmArgs })} />

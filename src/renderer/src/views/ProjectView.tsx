@@ -86,7 +86,9 @@ export function ProjectView({ projectId }: { projectId: string }): ReactNode {
     ...(project.gallery.length ? [['gallery', `Галерея (${project.gallery.length})`] as [Section, string]] : [])
   ]
   const links = [
-    { url: project.local ? undefined : `https://modrinth.com/project/${project.slug}`, label: 'Modrinth' },
+    project.id.startsWith('cf:')
+      ? { url: `https://www.curseforge.com/minecraft/${{ mod: 'mc-mods', resourcepack: 'texture-packs', shader: 'shaders', modpack: 'modpacks' }[project.kind]}/${project.slug}`, label: 'CurseForge' }
+      : { url: project.local ? undefined : `https://modrinth.com/project/${project.slug}`, label: 'Modrinth' },
     { url: project.sourceUrl, label: 'Исходный код' },
     { url: project.issuesUrl, label: 'Проблемы' },
     { url: project.wikiUrl, label: 'Вики' }

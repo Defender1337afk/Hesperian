@@ -324,6 +324,13 @@ export const useStore = create<State>((set, get) => ({
       set({ accountOpen: true })
       return
     }
+    const report = await api.checkConflicts(id).catch(() => null)
+    const serious = report?.issues.filter((i) => i.level === 'error') ?? []
+    if (serious.length) {
+      const text = serious.slice(0, 3).map((i) => `• ${i.text}`).join('\n') + (serious.length > 3 ? `\n…и ещё ${serious.length - 3}` : '')
+      const go = await get().confirm('С модами есть проблемы', `${text}\n\nИгра, скорее всего, не запустится. Подробности на вкладке «Моды».`, 'Всё равно играть')
+      if (!go) return
+    }
     set((s) => ({
       logs: { ...s.logs, [id]: [] },
       logInstanceId: id,

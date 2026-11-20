@@ -1,0 +1,65 @@
+[data-theme="grove"][data-mode="light"] {
+  --bg: #f3f6f3; --panel: #ecf1ec; --raised: #ffffff; --raised-2: #e4ebe5; --input: #ffffff;
+  --line: rgba(20, 45, 28, .08); --line-strong: rgba(20, 45, 28, .16);
+  --text: #16201a; --muted: #5a6a5f; --faint: #98a59c; --hover: rgba(20, 45, 28, .05);
+  --editor-bg: #f3f6f3; --gutter: #b3beb6;
+  --accent: hsl(var(--accent-h) 52% 36%); --on-accent: #ffffff; --accent-soft: hsl(var(--accent-h) 55% 42% / .12);
+  --shadow: 0 14px 34px rgba(20, 40, 25, .12), 0 1px 3px rgba(20, 40, 25, .08);
+  color-scheme: light;
+}
+[data-theme="bloom"][data-mode="light"] {
+  --bg: #f2f1ec; --panel: #fbfaf6; --raised: #efede7; --raised-2: #e5e2da; --input: #ffffff;
+  --line: rgba(40, 35, 20, .08); --line-strong: rgba(40, 35, 20, .15);
+  --text: #1d1c18; --muted: #6a675d; --faint: #a19d90; --hover: rgba(40, 35, 20, .05);
+  --editor-bg: #f2f1ec; --gutter: #c2beb2;
+  --accent: hsl(var(--accent-h) 55% 38%); --on-accent: #ffffff; --accent-soft: hsl(var(--accent-h) 60% 45% / .13);
+  --shadow: 0 20px 44px rgba(40, 35, 20, .12), 0 1px 3px rgba(40, 35, 20, .08);
+  color-scheme: light;
+}
+[data-mode="black"] {
+  --bg: #000000; --panel: #070707; --raised: #0f0f0f; --raised-2: #181818; --input: #050505;
+  --line: rgba(255, 255, 255, .07); --line-strong: rgba(255, 255, 255, .13);
+  --text: #ececec; --muted: #8a8a8a; --faint: #545454; --hover: rgba(255, 255, 255, .05);
+  --editor-bg: #000000; --gutter: #3a3a3a;
+  --accent: hsl(var(--accent-h) 62% 68%); --on-accent: hsl(var(--accent-h) 60% 8%); --accent-soft: hsl(var(--accent-h) 60% 62% / .13);
+  --shadow: 0 20px 50px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .04);
+  color-scheme: dark;
+}
+[data-mode="light"] .snow i { background: hsl(var(--accent-h) 40% 60% / .5); }
+[data-mode="light"] .nh-card { box-shadow: 0 30px 60px rgba(40, 35, 20, .14), 0 2px 6px rgba(40, 35, 20, .06); }
+[data-mode="light"] .nh-glow, [data-mode="light"] .nh-aura { opacity: .14; }
+[data-mode="light"] .scrim { background: rgba(30, 30, 20, .22); }
+[data-mode="light"] .conflict small, [data-mode="light"] .chart-axis { opacity: .9; }
+[data-mode="light"] .app .titlebar { background: var(--bg); }
+[data-mode="light"] .win-ctl button.close:hover { color: #fff; }
+[data-mode="black"] .nh-card { background: var(--panel); }
+html[data-mode] body { transition: background-color .25s ease; }
+[data-streamer="on"] .sensitive, [data-streamer="on"] .srv-addr, [data-streamer="on"] .srv-friend small, [data-streamer="on"] .srv-share code { filter: blur(6px); user-select: none; }
+[data-mode="light"] .nh-loader { color: color-mix(in srgb, var(--c) 55%, black); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.accents { align-items: center; }
+.accents-sep { width: 1px; height: 18px; margin: 0 4px; background: var(--line-strong); }
+.accent-sw.mono.white { background: #f4f4f4; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
+.accent-sw.mono.black { background: #0d0d0d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
+.accent-sw.mono.on, .accent-sw.grad.on { box-shadow: 0 0 0 2px var(--editor-bg), 0 0 0 3.5px var(--text); }
+.accent-sw.grad { width: 30px; border-radius: 10px; }
+[data-accent="black"] .btn.primary, [data-accent="black"] .run-btn, [data-accent="black"] .switch.on, [data-accent="black"] .nh-actions .run-btn { box-shadow: inset 0 0 0 1px var(--line-strong); }
+[data-accent="white"][data-mode="light"] .btn.primary, [data-accent="white"][data-mode="light"] .nh-actions .run-btn, [data-accent="white"][data-mode="light"] .switch.on { box-shadow: inset 0 0 0 1px var(--line-strong); }
+[data-accent="gradient"] .nh-actions .run-btn, [data-accent="gradient"] .app.bloom .btn.primary { background-size: 160% 100%; background-position: 0% 50%; transition: background-position .6s ease, border-radius .25s, transform .15s, filter .15s; }
+[data-accent="gradient"] .nh-actions .run-btn:hover:not(:disabled), [data-accent="gradient"] .app.bloom .btn.primary:hover:not(:disabled) { background-position: 100% 50%; }
+[data-accent="gradient"] .nh-wm span, [data-accent="gradient"] .wm span { background: var(--accent-fill); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.app.bloom .win-ctl { gap: 4px; align-items: center; margin-left: 2px; }
+.app.bloom .win-ctl button { width: 34px; height: 30px; border-radius: 10px; transition: background .15s, color .15s, border-radius .25s; }
+.app.bloom .win-ctl button:hover { border-radius: 8px; }
+.nh-mod-list::-webkit-scrollbar { width: 8px; }
+.nh-mod-list::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 18%, transparent); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+.nh-mod-list::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 30%, transparent); background-clip: padding-box; }
+.nh-mod-list::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
+.nh-mod-list::-webkit-scrollbar-button { display: none; height: 0; }
+*::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+.nh-actions .run-btn:hover:not(:disabled), .app.bloom .cv-head .run-btn:hover:not(:disabled), .nh-empty .run-btn:hover:not(:disabled) { background: var(--accent-fill, var(--accent)); color: var(--on-accent); border-color: transparent; }
+.nh-actions .run-btn.stop:hover:not(:disabled), .app.bloom .cv-head .run-btn.stop:hover:not(:disabled) { background: #ec8a8c; color: #2a0c0d; }
+[data-accent="gradient"] .nh-actions .run-btn:hover:not(:disabled) { background: var(--accent-fill); background-size: 160% 100%; background-position: 100% 50%; }
+:is([data-icons="accent"], [data-icons="mono"]) :is(img.item-icon, .hit-icon img, img.hit-icon, .nh-mod img, img.project-icon, .project-icon img, .nh-stack-faces img) { transition: filter .3s ease; }
+[data-icons="mono"] :is(img.item-icon, .hit-icon img, img.hit-icon, .nh-mod img, img.project-icon, .project-icon img) { filter: grayscale(1) contrast(1.08) brightness(1.05); }
+[data-icons="accent"] :is(img.item-icon, .hit-icon img, img.hit-icon, .nh-mod img, img.project-icon, .project-icon img) { filter: grayscale(1) sepia(1) saturate(3.2) hue-rotate(var(--icon-rotate)) brightness(1.02) contrast(1.05); }
+[data-icons="accent"] :is(.hit-icon-empty, .nh-mod-ph) { color: var(--accent); background: var(--accent-soft); }

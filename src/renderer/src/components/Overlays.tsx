@@ -110,7 +110,7 @@ export function AccountMenu(): ReactNode {
         <div className="am-actions">
           {others.map((account) => (
             <button key={account.id} onClick={() => void api.setActiveAccount(account.id).then(setAccounts)}>
-              <Avatar account={account} size={18} /> {account.name}
+              <Avatar account={account} size={18} /> <span className="sensitive">{account.name}</span>
               <small className="am-kind">{account.licensed ? 'лицензия' : 'офлайн'}</small>
             </button>
           ))}
@@ -179,7 +179,7 @@ export function LoginDialog(): ReactNode {
       <div className="dialog">
         <h2>Вход через Microsoft</h2>
         {!clientId ? (
-          <p className="muted">Для входа нужен Azure Client ID. Укажите его в настройках, инструкция есть в README.</p>
+          <p className="muted">Вход через Microsoft недоступен в этой сборке. Скачайте Hesperian с сайта defender1337afk.github.io, там он работает.</p>
         ) : (
           <p className="muted">Вход идёт на странице Microsoft, пароль лаунчеру не передаётся. Нужен для лицензионных серверов, скин подтянется сам.</p>
         )}

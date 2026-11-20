@@ -3,6 +3,7 @@ import { copyFile, mkdir, readdir, rename, stat } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import type { ContentItem, ContentKind, Instance } from '../shared/types'
 import { paths, readJsonSync, writeJsonSync } from './config'
+import { readModMeta } from './modmeta'
 import { assertId, getInstance } from './instances'
 
 export interface ContentMeta {
@@ -28,6 +29,17 @@ export function contentDir(instance: Instance, kind: ContentKind): string {
 const prettify = (file: string): string =>
   file.replace(/\.(jar|zip|litemod)$/i, '').replace(/[-_]+/g, ' ')
 
+const jarNames = new Map<string, { name: string; version: string } | null>()
+
+function jarInfo(path: string, file: string, mtime: number): { name: string; version: string } | null {
+  const key = `${path}:${mtime}`
+  if (!jarNames.has(key)) {
+    const meta = readModMeta(path, file)
+    jarNames.set(key, meta && meta.name && meta.name !== file ? { name: meta.name, version: meta.version } : null)
+  }
+  return jarNames.get(key)!
+}
+
 export async function listContent(id: string, kind: ContentKind): Promise<ContentItem[]> {
   const instance = getInstance(id)
   const dir = contentDir(instance, kind)
@@ -41,15 +53,17 @@ export async function listContent(id: string, kind: ContentKind): Promise<Conten
         const enabled = !e.name.endsWith(DISABLED)
         const file = enabled ? e.name : e.name.slice(0, -DISABLED.length)
         const info = meta[file]
+        const st = await stat(join(dir, e.name))
+        const local = !info && kind === 'mod' && file.endsWith('.jar') ? jarInfo(join(dir, e.name), file, st.mtimeMs) : null
         return {
           file,
           enabled,
-          size: (await stat(join(dir, e.name))).size,
-          title: info?.title ?? prettify(file),
+          size: st.size,
+          title: info?.title ?? local?.name ?? prettify(file),
           iconUrl: info?.iconUrl,
           projectId: info?.projectId,
           versionId: info?.versionId,
-          versionNumber: info?.versionNumber
+          versionNumber: info?.versionNumber ?? (local?.version && !local.version.startsWith('$') ? local.version : undefined)
         }
       })
   )

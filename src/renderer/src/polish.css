@@ -1,15 +1,9 @@
 .app .titlebar { position: relative; background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 86%, var(--accent) 4%), var(--panel)); }
-.app .titlebar::after, .app .statusbar::before {
-  content: ''; position: absolute; left: 0; right: 0; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, hsl(var(--accent-h) 60% 60% / .55) 30%, hsl(calc(var(--accent-h) + 60) 60% 60% / .35) 70%, transparent);
-}
-.app .titlebar::after { bottom: 0; }
 .app .statusbar { position: relative; }
-.app .statusbar::before { top: 0; opacity: .6; }
 
 .app .tab { transition: background .15s, color .15s; }
 .app .tab.active { position: relative; }
-.app .tab.active::before { content: ''; position: absolute; left: 10px; right: 10px; top: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.app .tab.active::before { content: ''; position: absolute; left: 10px; right: 10px; top: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent-fill, var(--accent)); box-shadow: 0 0 12px var(--accent); }
 .app .rail-ind { box-shadow: 0 0 14px var(--accent); }
 .app .rail .icon-btn { transition: background .15s, color .15s, transform .2s cubic-bezier(.2, 1.4, .4, 1); }
 .app .rail .icon-btn:hover { transform: scale(1.08); }

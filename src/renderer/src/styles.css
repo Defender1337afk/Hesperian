@@ -68,7 +68,7 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .icon-btn:active:not(:disabled) { transform: scale(.92); }
 .icon-btn.on { color: var(--text); }
 .icon-btn.sm { width: 22px; height: 22px; }
-.ib-badge { position: absolute; top: 3px; right: 2px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: var(--on-accent);
+.ib-badge { position: absolute; top: 3px; right: 2px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--accent-fill, var(--accent)); color: var(--on-accent);
   font-size: 9.5px; font-weight: 700; line-height: 15px; animation: popIn .3s var(--spring); }
 .input { height: 32px; width: 100%; padding: 0 11px; border-radius: var(--radius); background: var(--input); border: 1px solid var(--line-strong);
   outline: none; user-select: text; transition: border-color .15s, box-shadow .15s; }
@@ -150,7 +150,7 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .rail { position: relative; width: 46px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; background: var(--bg); border-right: 1px solid var(--line); }
 .rail .icon-btn { width: 38px; height: 38px; border-radius: 9px; }
 .rail .icon-btn.on { color: var(--text); }
-.rail-ind { position: absolute; left: 0; top: 16px; width: 2px; height: 22px; border-radius: 0 2px 2px 0; background: var(--accent);
+.rail-ind { position: absolute; left: 0; top: 16px; width: 2px; height: 22px; border-radius: 0 2px 2px 0; background: var(--accent-fill, var(--accent));
   transition: transform .35s var(--spring), opacity .2s; }
 .rail-spacer { flex: 1; }
 
@@ -177,7 +177,7 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
   transition: color .15s, background .15s; animation: tabIn .22s var(--ease); }
 .tab:hover { color: var(--text); background: var(--hover); }
 .tab.active { color: var(--text); }
-.tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 1.5px; border-radius: 2px; background: var(--accent);
+.tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 1.5px; border-radius: 2px; background: var(--accent-fill, var(--accent));
   transform: scaleX(0); transition: transform .28s var(--spring); }
 .tab.active::after { transform: scaleX(1); }
 .tab.shown::after { transform: scaleX(1); background: var(--faint); }
@@ -196,7 +196,7 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .panes { flex: 1; display: flex; min-height: 0; }
 .pane { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 .panes.split .pane + .pane { border-left: 1px solid var(--line); animation: paneIn .28s var(--ease); }
-.panes.split .pane::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--accent); opacity: 0; transition: opacity .2s; z-index: 2; }
+.panes.split .pane::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--accent-fill, var(--accent)); opacity: 0; transition: opacity .2s; z-index: 2; }
 .panes.split .pane.focused::before { opacity: .7; }
 @keyframes paneIn { from { opacity: 0; transform: translateX(14px); } }
 
@@ -208,10 +208,10 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .panel-tab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 10px; font-size: 12px; color: var(--muted); transition: color .15s; }
 .panel-tab:hover { color: var(--text); }
 .panel-tab.on { color: var(--text); }
-.panel-tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 6px; height: 1.5px; background: var(--accent); transform: scaleX(0); transition: transform .25s var(--spring); }
+.panel-tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 6px; height: 1.5px; background: var(--accent-fill, var(--accent)); transform: scaleX(0); transition: transform .25s var(--spring); }
 .panel-tab.on::after { transform: scaleX(1); }
 .panel-note { font-size: 11.5px; color: var(--faint); margin-right: 6px; }
-.pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.2s infinite; }
+.pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-fill, var(--accent)); display: inline-block; animation: pulse 1.2s infinite; }
 @keyframes pulse { 50% { opacity: .3; transform: scale(.7); } }
 .log { flex: 1; overflow: auto; padding: 6px 16px 12px; font: 12.5px/1.55 var(--code-font); white-space: pre-wrap; word-break: break-word; user-select: text; }
 .log-empty { color: var(--faint); font-family: var(--ui-font); padding: 6px 0; white-space: normal; }
@@ -278,7 +278,7 @@ kbd { font: 500 10.5px var(--ui-font); padding: 1px 5px; border-radius: 4px; col
 .seg.full button { flex: 1 1 auto; min-width: 0; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; }
 .switch { width: 34px; height: 20px; border-radius: 10px; background: var(--raised-2); border: 1px solid var(--line-strong); position: relative; transition: background .2s; }
 .switch span { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); transition: transform .3s var(--spring), background .2s; }
-.switch.on { background: var(--accent); border-color: transparent; }
+.switch.on { background: var(--accent-fill, var(--accent)); border-color: transparent; }
 .switch.on span { transform: translateX(14px); background: var(--on-accent); }
 .range { display: flex; align-items: center; gap: 12px; }
 .range input { -webkit-appearance: none; appearance: none; width: 200px; height: 3px; border-radius: 3px;

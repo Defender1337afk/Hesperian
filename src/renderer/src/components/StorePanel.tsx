@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { ContentKind, StoreHit, StoreKind, StoreQuery } from '../../../shared/types'
+import type { ContentKind, StoreHit, StoreKind, StoreQuery, StoreSource } from '../../../shared/types'
 import { api } from '../bridge'
 import { useStore } from '../store'
 import { errorText, formatDownloads, LOADER_NAMES, Seg } from './common'
@@ -128,6 +128,22 @@ export function StorePanel(): ReactNode {
   const targetId = useStore((s) => s.storeTarget)
   const kind = useStore((s) => s.storeKind)
   const [query, setQuery] = useState('')
+  const [source, setSourceState] = useState<StoreSource>(() => {
+    try {
+      return localStorage.getItem('storeSource') === 'curseforge' ? 'curseforge' : 'modrinth'
+    } catch {
+      return 'modrinth'
+    }
+  })
+  const setSource = (next: StoreSource): void => {
+    setSourceState(next)
+    try {
+      localStorage.setItem('storeSource', next)
+    } catch {
+      return
+    }
+    if (next === 'curseforge' && kind === 'modpack') useStore.setState({ storeKind: 'mod' })
+  }
   const [sort, setSort] = useState<StoreQuery['sort']>('relevance')
   const [packVersion, setPackVersion] = useState('')
   const [packLoader, setPackLoader] = useState('')
@@ -154,7 +170,7 @@ export function StorePanel(): ReactNode {
     setLoading(true)
     setError(null)
     try {
-      const result = await api.searchStore({ kind, query, sort, gameVersions, loader, offset })
+      const result = await api.searchStore({ source, kind, query, sort, gameVersions, loader, offset })
       if (id !== requestId.current) return
       setHits((prev) => (offset ? [...prev, ...result.hits] : result.hits))
       setTotal(result.total)
@@ -168,14 +184,15 @@ export function StorePanel(): ReactNode {
   useEffect(() => {
     const timer = setTimeout(() => void run(0), query ? 300 : 0)
     return () => clearTimeout(timer)
-  }, [kind, query, sort, gameVersions, loader])
+  }, [source, kind, query, sort, gameVersions, loader])
 
   return (
     <div className="store">
-      <div className="side-head"><span className="side-title">Магазин · Modrinth</span></div>
+      <div className="side-head"><span className="side-title">Магазин</span></div>
       <div className="pad-x">
+        <Seg full value={source} options={[['modrinth', 'Modrinth'], ['curseforge', 'CurseForge']]} onChange={setSource} />
         <input className="input sm" placeholder="Поиск…" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <Seg full value={kind} options={KINDS} onChange={(storeKind) => useStore.setState({ storeKind })} />
+        <Seg full value={kind} options={source === 'curseforge' ? KINDS.filter(([k]) => k !== 'modpack') : KINDS} onChange={(storeKind) => useStore.setState({ storeKind })} />
         {packs ? (
           <div className="store-pair">
             <select className="select" value={packVersion} onChange={(e) => setPackVersion(e.target.value)} aria-label="Версия игры">

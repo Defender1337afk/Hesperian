@@ -9,10 +9,11 @@ import { getSettings, paths } from '../config'
 import { emit, Task } from '../events'
 import { fabricVersions, installFabric } from './fabric'
 import { forgeVersions, installForgeLike, neoforgeVersions } from './forge'
-import { ensureJava, javaVersion } from './java'
+import { ensureJava, javaReady, javaVersion } from './java'
 import { libraryFiles, rulesAllow } from './library'
 import { LogParser } from './log'
-import { ArgValue, extractNatives, installVanilla, readVersionJson, resolveVersion, VersionJson } from './vanilla'
+import { Session } from '../session'
+import { ArgValue, ensureVersionJson, extractNatives, installVanilla, readVersionJson, resolveVersion, VersionJson } from './vanilla'
 
 export interface LaunchAuth {
   name: string
@@ -77,7 +78,11 @@ export async function launchExternal(instance: Instance, resolveExe: () => Promi
   child.on('close', finish)
 }
 
+const sessions = new Map<string, Session>()
+
 export const stopGame = (id: string): void => {
+  const session = sessions.get(id)
+  if (session) session.stoppedByUser = true
   running.get(id)?.kill()
 }
 
@@ -91,10 +96,22 @@ export const pickLoaderVersion = async (instance: Instance, loader: keyof typeof
   return best.version
 }
 
-export async function ensureInstalled(instance: Instance, task: Task, verify = false): Promise<{ versionId: string; javaGui: string; java: string }> {
-  await installVanilla(instance.mcVersion, task, verify)
+export async function ensureInstalled(instance: Instance, task: Task, verify = false): Promise<{ versionId: string; javaGui: string; java: string; javaMajor: number }> {
+  await ensureVersionJson(instance.mcVersion, task)
   const major = (await readVersionJson(instance.mcVersion)).javaVersion?.majorVersion ?? 8
-  const { java, javaGui } = await ensureJava(major, task, instance.javaPath)
+  const javaJob = async (): Promise<{ java: string; javaGui: string }> => {
+    if (instance.javaPath || javaReady(major)) return ensureJava(major, task, instance.javaPath)
+    const own = new Task(`Java ${major}`)
+    try {
+      const result = await ensureJava(major, own)
+      own.finish()
+      return result
+    } catch (e) {
+      own.fail(e)
+      throw e
+    }
+  }
+  const [, { java, javaGui }] = await Promise.all([installVanilla(instance.mcVersion, task, verify), javaJob()])
   let versionId = instance.mcVersion
   if (instance.loader === 'fabric') {
     versionId = await installFabric(instance.mcVersion, await pickLoaderVersion(instance, 'fabric'), task, verify)
@@ -102,7 +119,7 @@ export async function ensureInstalled(instance: Instance, task: Task, verify = f
     const version = await pickLoaderVersion(instance, instance.loader)
     versionId = await installForgeLike(instance.loader, instance.mcVersion, version, java, task, verify)
   }
-  return { versionId, java, javaGui }
+  return { versionId, java, javaGui, javaMajor: major }
 }
 
 const expandArgs = (args: ArgValue[], features: Record<string, boolean>): string[] =>
@@ -120,7 +137,8 @@ export function buildCommand(
   auth: LaunchAuth,
   nativesDir: string,
   classpath: string[],
-  server?: string
+  server?: string,
+  javaMajor = 8
 ): string[] {
   const settings = getSettings()
   const gameDir = paths.gameDir(instance.id)
@@ -169,6 +187,9 @@ export function buildCommand(
   const own = [...splitArgs(settings.defaultJvmArgs), ...splitArgs(instance.jvmArgs ?? '')]
   if (settings.lowEnd && !own.some((a) => /^-XX:\+Use\w+GC$/.test(a))) jvm.push(...LOW_END_FLAGS)
   jvm.push(...own)
+  if (javaMajor >= 19 && settings.classCache && !own.some((a) => a.includes('SharedArchiveFile') || a.startsWith('-Xshare'))) {
+    jvm.push(`-XX:SharedArchiveFile=${join(paths.instanceDir(instance.id), '.cache', `classes-${version.id}.jsa`)}`, '-XX:+AutoCreateSharedArchive')
+  }
   jvm.push(...expandArgs(version.arguments?.jvm ?? [], features).map(fill))
   const gameArgs = expandArgs(version.arguments?.game ?? [], features).map(fill)
   if (server && !quickPlay) {
@@ -219,7 +240,8 @@ export async function launchGame(
     if (!existsSync(jar)) await copyFile(paths.versionJar(version.jar ?? version.inheritsFrom ?? version.id), jar)
     classpath.push(jar)
     await mkdir(paths.gameDir(id), { recursive: true })
-    args = buildCommand(version, instance, auth, natives, classpath, server)
+    await mkdir(join(paths.instanceDir(id), '.cache'), { recursive: true })
+    args = buildCommand(version, instance, auth, natives, classpath, server, installed.javaMajor)
     if (server) await skipOnboarding(paths.gameDir(id))
     log(`Hesperian: ${await javaVersion(installed.java).catch(() => 'версия Java неизвестна')}`)
     log(`Hesperian: версия ${installed.versionId}, игрок ${auth.name}, каталог ${paths.gameDir(id)}`)
@@ -231,15 +253,19 @@ export async function launchGame(
     throw e
   }
 
-  const child = spawn(javaGui, args, { cwd: paths.gameDir(id), windowsHide: true })
+  const child = spawn(javaGui, args, { cwd: paths.gameDir(id), windowsHide: true, env: { ...process.env, HESPERIAN_STATS: '1' } })
   running.set(id, child)
   const startedAt = Date.now()
+  const session = new Session(id, child.pid, instance.name)
+  sessions.set(id, session)
   emit('game:state', { instanceId: id, state: 'running' })
 
   const parser = new LogParser()
   const secret = auth.userType === 'msa' ? auth.accessToken : null
-  const sink = (text: string, level: 'info' | 'warn' | 'error' | 'debug'): void =>
-    log(secret ? text.replaceAll(secret, '<token>') : text, level)
+  const sink = (text: string, level: 'info' | 'warn' | 'error' | 'debug'): void => {
+    const clean = secret ? text.replaceAll(secret, '<token>') : text
+    if (!session.intercept(clean)) log(clean, level)
+  }
   child.stdout?.setEncoding('utf8').on('data', (d: string) => parser.feed(d, sink))
   child.stderr?.setEncoding('utf8').on('data', (d: string) => parser.feed(d, sink))
 
@@ -252,6 +278,8 @@ export async function launchGame(
     onExit(Math.round((Date.now() - startedAt) / 1000))
     log(`Hesperian: игра завершилась с кодом ${code}`, code === 0 ? 'info' : 'error')
     emit('game:state', { instanceId: id, state: 'stopped', exitCode: code })
+    sessions.delete(id)
+    void session.finish(code)
   }
   child.on('error', (e) => {
     log(`Не удалось запустить Java: ${e.message}`, 'error')

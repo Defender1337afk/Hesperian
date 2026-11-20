@@ -33,6 +33,8 @@ export interface Instance {
   createdAt: number
   lastPlayedAt?: number
   playTimeSec: number
+  pinned?: boolean
+  autoBackup?: boolean
 }
 
 export interface ModpackInfo {
@@ -77,6 +79,16 @@ export interface Settings {
   panelHeight: number
   backgroundImage: string
   backgroundOpacity: number
+  backgroundBlur: number
+  backgroundFit: 'cover' | 'contain'
+  appearance: 'dark' | 'light' | 'black' | 'system'
+  accentMode: 'hue' | 'white' | 'black' | 'gradient'
+  accentGradient: string
+  minimizeToTray: boolean
+  breakReminderMin: number
+  streamerMode: boolean
+  classCache: boolean
+  iconStyle: 'original' | 'accent' | 'mono'
   customCss: string
   defaultMemoryMb: number
   defaultJvmArgs: string
@@ -87,6 +99,7 @@ export interface Settings {
   openPanelOnLaunch: boolean
   dataDir: string
   msClientId: string
+  cfApiKey: string
   bigPictureBackground: 'panorama' | 'lines'
   bigPictureOnStart: boolean
   windowBounds?: { x: number; y: number; width: number; height: number }
@@ -127,7 +140,10 @@ export interface ContentItem {
   versionNumber?: string
 }
 
+export type StoreSource = 'modrinth' | 'curseforge'
+
 export interface StoreQuery {
+  source?: StoreSource
   kind: StoreKind
   query: string
   sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated'
@@ -271,6 +287,68 @@ export interface SkinLibraryItem {
   variant: 'classic' | 'slim'
   addedAt: number
   data: string
+}
+
+export interface ConflictIssue {
+  level: 'error' | 'warn'
+  kind: 'duplicate' | 'loader' | 'version' | 'missing' | 'range' | 'breaks' | 'known' | 'unknown'
+  files: string[]
+  text: string
+  need?: string
+}
+
+export interface ConflictReport {
+  checked: number
+  issues: ConflictIssue[]
+}
+
+export interface DropResult {
+  added: string[]
+  skipped: string[]
+  background?: string
+  modpack?: string
+}
+
+export interface SessionSample {
+  t: number
+  rss?: number
+  heap?: number
+  fps?: number
+  cpu?: number
+}
+
+export interface SessionSummary {
+  startedAt: number
+  endedAt: number
+  durationSec: number
+  avgFps?: number
+  minFps?: number
+  maxFps?: number
+  peakRssMb?: number
+  peakHeapMb?: number
+  heapMaxMb?: number
+  exitCode: number | null
+  stopped?: boolean
+  samples: SessionSample[]
+}
+
+export interface SessionStats {
+  sessions: SessionSummary[]
+}
+
+export interface CrashReport {
+  code: number | null
+  title: string
+  hint: string
+  details: string[]
+  log: string
+}
+
+export interface SessionReport {
+  instanceId: string
+  instanceName: string
+  summary: SessionSummary
+  crash?: CrashReport
 }
 
 export type UpdateKind = 'win-setup' | 'win-portable' | 'linux-appimage' | 'linux-tar'

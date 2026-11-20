@@ -74,7 +74,7 @@ const MODS: LocalMod[] = [
   {
     id: 'astra-visuals',
     title: 'Astra Visuals',
-    version: '1.2.2',
+    version: '1.5.0',
     gameVersion: '1.21.11',
     loader: 'fabric',
     description: 'Главное меню в стиле GNOME, Windows 11 или macOS, liquid glass, созвездия, шейдер рук',

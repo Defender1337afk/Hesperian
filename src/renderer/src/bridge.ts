@@ -1,6 +1,7 @@
 import type { Api } from '../../main/api'
 
 interface Bridge {
+  pathFor?(file: File): string
   invoke(name: string, ...args: unknown[]): Promise<unknown>
   on(channel: string, listener: (payload: unknown) => void): () => void
 }

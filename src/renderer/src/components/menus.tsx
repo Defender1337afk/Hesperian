@@ -15,6 +15,18 @@ export function instanceMenu(id: string): MenuEntry[] {
     { label: 'Открыть', run: () => s.openInstance(id) },
     { label: 'Папка игры', icon: <I.folderOpen size={14} />, run: () => void api.openInstanceFolder(id, 'game') },
     { sep: true },
+    {
+      label: s.instances.find((i) => i.id === id)?.pinned ? 'Открепить' : 'Закрепить сверху',
+      run: () => void api.updateInstance(id, { pinned: !s.instances.find((i) => i.id === id)?.pinned }).then(() => s.refreshInstances())
+    },
+    {
+      label: 'Ярлык на рабочем столе',
+      run: () =>
+        void api
+          .createShortcut(id)
+          .then(() => s.toast('info', 'Ярлык создан: по нему сборка запустится сразу'))
+          .catch((e: unknown) => s.toast('error', e instanceof Error ? e.message : String(e)))
+    },
     { label: 'Дублировать', icon: <I.copy size={14} />, run: () => void s.duplicateInstance(id) },
     { label: 'Экспорт в .mrpack…', run: () => void s.exportModpack(id) },
     { label: 'Удалить', icon: <I.trash size={14} />, danger: true, run: () => void s.removeInstance(id) }
@@ -35,7 +47,6 @@ export function menuItems(name: string): MenuEntry[] {
       { sep: true },
       { label: 'Big Picture', kbd: 'F11', run: () => void s.enterBigPicture() },
       { label: 'Настройки', kbd: 'Ctrl+,', run: () => s.openSettings() },
-      { label: 'Серверы', run: () => s.openServers() },
       { label: 'Закрыть вкладку', kbd: 'Ctrl+W', disabled: !s.activeTabId, run: () => s.activeTabId && s.closeTab(s.activeTabId) },
       { sep: true },
       { label: 'Выход', run: () => void api.winClose() }
@@ -47,8 +58,16 @@ export function menuItems(name: string): MenuEntry[] {
       { sep: true },
       { label: 'Боковая панель', kbd: 'Ctrl+B', check: Boolean(s.sidebar), run: () => s.toggleSidebar() },
       { label: 'Вывод игры', kbd: 'Ctrl+`', check: s.panelOpen, run: () => useStore.setState({ panelOpen: !s.panelOpen }) },
+      { label: 'Режим стримера', check: Boolean(s.settings?.streamerMode), run: () => void s.patchSettings({ streamerMode: !s.settings?.streamerMode }) },
+      { label: 'Горячие клавиши', kbd: 'F1', run: () => window.dispatchEvent(new Event('hesperian:hotkeys')) },
       { sep: true },
-      ...THEMES.map((t) => ({ label: t.name, check: s.settings?.theme === t.id, run: () => switchTheme(t.id) }))
+      ...THEMES.map((t) => ({ label: t.name, check: s.settings?.theme === t.id, run: () => switchTheme(t.id) })),
+      { sep: true },
+      ...([['dark', 'Тёмное оформление'], ['light', 'Светлое оформление'], ['black', 'Чёрное оформление'], ['system', 'Как в системе']] as const).map(([id, label]) => ({
+        label,
+        check: (s.settings?.appearance ?? 'dark') === id,
+        run: () => void s.patchSettings({ appearance: id })
+      }))
     ],
     game: [
       { label: 'Играть', kbd: 'F5', disabled: !selected || busy, run: () => selected && void s.play(selected) },
@@ -90,7 +109,6 @@ export function commands(): MenuEntry[] {
     { label: 'Начальный экран', run: () => s.openWelcome() },
     { label: 'Боковая панель', kbd: 'Ctrl+B', run: () => s.toggleSidebar() },
     { label: 'Вывод игры', kbd: 'Ctrl+`', run: () => useStore.setState({ panelOpen: !s.panelOpen }) },
-    { label: 'Серверы', run: () => s.openServers() },
     { label: 'Скины', run: () => s.openSkins() },
     { label: 'Что нового', run: () => useStore.setState({ whatsNewOpen: true }) },
     ...THEMES.map((t) => ({ label: `Интерфейс: ${t.name}`, run: () => switchTheme(t.id) }))

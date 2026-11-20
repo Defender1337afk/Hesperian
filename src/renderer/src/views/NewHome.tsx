@@ -144,12 +144,38 @@ export function NewHome(): ReactNode {
   const select = useStore((s) => s.select)
   const openInstance = useStore((s) => s.openInstance)
   const account = useStore((s) => s.accounts.find((a) => a.id === s.activeAccountId))
-  const ordered = useMemo(() => [...instances].sort((a, b) => (b.lastPlayedAt ?? b.createdAt) - (a.lastPlayedAt ?? a.createdAt)), [instances])
-  const current = instances.find((i) => i.id === selectedId) ?? ordered[0]
-  const isLast = current && current.id === ordered[0]?.id && Boolean(current.lastPlayedAt)
+  const byRecent = useMemo(() => [...instances].sort((a, b) => (b.lastPlayedAt ?? b.createdAt) - (a.lastPlayedAt ?? a.createdAt)), [instances])
+  const ordered = useMemo(() => [...byRecent].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))), [byRecent])
+  const current = instances.find((i) => i.id === selectedId) ?? byRecent[0]
+  const isLast = current && current.id === byRecent[0]?.id && Boolean(current.lastPlayedAt)
   const motion = useStore((s) => s.settings?.animations !== false)
   const card = useRef<HTMLElement>(null)
   useLookAt(card, motion && Boolean(current))
+  useEffect(() => {
+    const key = (e: KeyboardEvent): void => {
+      const s = useStore.getState()
+      if (s.promptRequest || s.confirmRequest || s.newInstanceOpen || s.loginOpen || s.palette || s.menu || e.ctrlKey || e.metaKey || e.altKey) return
+      const el = document.activeElement
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || (el as HTMLElement).isContentEditable)) return
+      if (!current) return
+      if (e.key === 'Enter') {
+        const state = s.games[current.id]
+        if (!state || state === 'stopped') {
+          e.preventDefault()
+          void s.play(current.id)
+        }
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const i = ordered.findIndex((x) => x.id === current.id)
+        const next = ordered[(i + (e.key === 'ArrowRight' ? 1 : -1) + ordered.length) % ordered.length]
+        if (next) {
+          e.preventDefault()
+          select(next.id)
+        }
+      }
+    }
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [current, ordered, select])
   const root = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
   useFit(root, inner, `${current?.id}:${instances.length}`)
@@ -181,7 +207,7 @@ export function NewHome(): ReactNode {
                 <div className="nh-side">
                   <div className="nh-stats">
                     <div><I.clock size={15} /><small>Наиграно</small><b>{hours(current.playTimeSec)}</b></div>
-                    <div><I.user size={15} /><small>Игрок</small><b>{account?.name ?? 'нет аккаунта'}</b></div>
+                    <div><I.user size={15} /><small>Игрок</small><b className="sensitive">{account?.name ?? 'нет аккаунта'}</b></div>
                   </div>
                   <div className="nh-quick">
                     {current.loader !== 'vanilla' && (
@@ -202,7 +228,7 @@ export function NewHome(): ReactNode {
             <div className="nh-others rise" style={rise(3)}>
               {ordered.map((i) => (
                 <button key={i.id} className={`nh-chip ${i.id === current.id ? 'on' : ''}`} onClick={() => select(i.id)} onDoubleClick={() => openInstance(i.id)}>
-                  <span className="fdot" style={{ background: i.color }} />
+                  {i.pinned ? <I.star size={12} /> : <span className="fdot" style={{ background: i.color }} />}
                   {i.name}
                   <small>{i.mcVersion}</small>
                 </button>

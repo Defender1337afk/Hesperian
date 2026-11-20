@@ -49,7 +49,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .nh-mods small { color: var(--muted); font-size: 12px; text-align: center; }
 .nh-label { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
 .nh-label em { font-style: normal; font-size: 11px; color: var(--muted); padding: 1px 7px; border-radius: 99px; background: var(--raised); }
-.nh-mod-list { display: flex; flex-direction: column; gap: 2px; overflow: auto; margin: 0 -4px; padding: 0 4px; scrollbar-width: thin; mask-image: linear-gradient(180deg, #000 85%, transparent); }
+.nh-mod-list { display: flex; flex-direction: column; gap: 2px; overflow: auto; margin: 0 -4px; padding: 0 4px; mask-image: linear-gradient(180deg, #000 85%, transparent); }
 .nh-mod { display: flex; align-items: center; gap: 9px; padding: 5px 7px; border-radius: 10px; font-size: 12.5px; min-width: 0; transition: background .15s; }
 .nh-mod:hover { background: var(--hover); }
 .nh-mod span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -57,7 +57,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .nh-mod-ph { display: grid; place-items: center; background: var(--raised); color: var(--muted); }
 .nh-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .nh-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.nh-stats div { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 13px 14px; border-radius: 18px; background: var(--raised); min-width: 0; }
+.nh-stats div { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 13px 14px; border-radius: 18px; background: color-mix(in srgb, var(--text) 7%, var(--panel)); border: 1px solid var(--line-strong); min-width: 0; }
 .nh-stats svg { grid-row: span 2; color: var(--accent); opacity: .9; }
 .nh-stats small { color: var(--muted); font-size: 11px; }
 .nh-stats b { font-size: 15px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -65,8 +65,8 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .nh-quick button { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 11px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; cursor: pointer; transition: background .15s, color .15s; }
 .nh-quick button:hover { background: var(--hover); color: var(--text); }
 .nh-actions { display: grid; grid-template-columns: 1.1fr 1fr; gap: 10px; }
-.nh-actions .run-btn { justify-content: center; height: 50px; padding: 0 22px; border-radius: 18px; font-size: 15.5px; font-weight: 650; background: var(--accent); color: var(--on-accent); border: 0; box-shadow: 0 10px 26px color-mix(in srgb, var(--accent) 28%, transparent); transition: border-radius .25s, transform .15s, box-shadow .2s, filter .15s; }
-.nh-actions .run-btn:hover:not(:disabled) { border-radius: 13px; filter: brightness(1.06); box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 38%, transparent); }
+.nh-actions .run-btn { justify-content: center; height: 50px; padding: 0 22px; border-radius: 18px; font-size: 15.5px; font-weight: 650; background: var(--accent-fill, var(--accent)); color: var(--on-accent); border: 0; box-shadow: none; transition: border-radius .25s, transform .15s, filter .15s; }
+.nh-actions .run-btn:hover:not(:disabled) { border-radius: 13px; filter: brightness(1.06); box-shadow: none; }
 .nh-actions .run-btn:active:not(:disabled) { transform: scale(.97); }
 .nh-actions .run-btn.stop { background: #e5787a; color: #2a0c0d; box-shadow: none; }
 .nh-actions .run-btn:disabled { background: var(--raised-2); color: var(--muted); box-shadow: none; }
@@ -83,7 +83,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .nh-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 24px; text-align: center; width: min(560px, 100%); }
 .nh-empty b { font-size: 20px; }
 .nh-empty small { color: var(--muted); max-width: 320px; }
-.nh-empty .run-btn { height: 44px; padding: 0 22px; border-radius: 16px; margin-top: 8px; background: var(--accent); color: var(--on-accent); border: 0; }
+.nh-empty .run-btn { height: 44px; padding: 0 22px; border-radius: 16px; margin-top: 8px; background: var(--accent-fill, var(--accent)); color: var(--on-accent); border: 0; }
 
 .tc-bloom-body { position: absolute; left: 16px; right: 8px; top: 8px; bottom: 8px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .tc-bloom-body i { width: 44%; height: 4px; border-radius: 2px; }
@@ -100,8 +100,8 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .app.bloom .btn { height: 34px; padding: 0 16px; border-radius: var(--r-ctl); background: var(--raised); border-color: transparent; transition: border-radius .25s, background .15s, transform .15s, box-shadow .2s; }
 .app.bloom .btn:hover:not(:disabled) { background: var(--raised-2); border-color: transparent; border-radius: 9px; }
 .app.bloom .btn.sm { height: 28px; padding: 0 12px; border-radius: 10px; }
-.app.bloom .btn.primary { background: var(--accent); color: var(--on-accent); }
-.app.bloom .btn.primary:hover:not(:disabled) { background: var(--accent); opacity: 1; filter: brightness(1.06); box-shadow: 0 8px 22px -10px var(--accent); }
+.app.bloom .btn.primary { background: var(--accent-fill, var(--accent)); color: var(--on-accent); }
+.app.bloom .btn.primary:hover:not(:disabled) { background: var(--accent-fill, var(--accent)); opacity: 1; filter: brightness(1.06); box-shadow: 0 8px 22px -10px var(--accent); }
 .app.bloom .btn.danger { background: #e5787a; color: #2a0c0d; }
 .app.bloom .ghost-btn { height: 30px; padding: 0 12px; border-radius: 10px; }
 .app.bloom .icon-btn { border-radius: 10px; }
@@ -114,7 +114,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .app.bloom .switch { width: 40px; height: 24px; border-radius: 12px; }
 .app.bloom .switch span { top: 3px; left: 3px; width: 16px; height: 16px; }
 .app.bloom .switch.on span { transform: translateX(16px); }
-.app.bloom .range input::-webkit-slider-thumb { width: 16px; height: 16px; background: var(--accent); border-color: var(--bg); }
+.app.bloom .range input::-webkit-slider-thumb { width: 16px; height: 16px; background: var(--accent-fill, var(--accent)); border-color: var(--bg); }
 
 .app.bloom .wm { font-weight: 300; letter-spacing: -.03em; font-size: 58px; }
 .app.bloom .wm span { color: var(--text); }
@@ -142,7 +142,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .app.bloom .cloud-view > * { max-width: 980px; margin-left: auto; margin-right: auto; }
 .app.bloom .cv-head { padding: 22px 24px; border-radius: 28px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 16px; position: relative; overflow: hidden; }
 .app.bloom .cv-head h1 { font-size: 34px; font-weight: 300; letter-spacing: -.03em; }
-.app.bloom .cv-head .run-btn { height: 40px; padding: 0 20px; border-radius: 14px; background: var(--accent); color: var(--on-accent); border: 0; font-weight: 650; }
+.app.bloom .cv-head .run-btn { height: 40px; padding: 0 20px; border-radius: 14px; background: var(--accent-fill, var(--accent)); color: var(--on-accent); border: 0; font-weight: 650; }
 .app.bloom .cv-head .run-btn.stop { background: #e5787a; color: #2a0c0d; }
 .app.bloom .view-tabs { margin: 0 0 16px; }
 .app.bloom .item-toolbar { padding: 10px; border-radius: 18px; background: var(--panel); margin-bottom: 10px; }
@@ -178,7 +178,7 @@ button.wordmark { background: none; border: 0; cursor: pointer; -webkit-app-regi
 .app.bloom .hit:hover { background: var(--raised); }
 .app.bloom .hit-icon, .app.bloom .hit-icon-empty { border-radius: 12px; }
 .app.bloom .hit-install { height: 26px; border-radius: 999px; padding: 0 12px; background: var(--accent-soft); }
-.app.bloom .hit-install:hover { background: var(--accent); color: var(--on-accent); }
+.app.bloom .hit-install:hover { background: var(--accent-fill, var(--accent)); color: var(--on-accent); }
 
 .app.bloom .bottom-panel, .app.bloom .panel { border-radius: 18px 18px 0 0; }
 .tc-preview.tc-bloom { position: relative; overflow: hidden; }

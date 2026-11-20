@@ -3,6 +3,20 @@ import { api, onEvent } from './bridge'
 
 const MIN_SHOW = 1100
 
+function applyBootPalette(): void {
+  const boot = document.getElementById('boot')
+  if (!boot) return
+  try {
+    const p = JSON.parse(localStorage.getItem('bootPalette') ?? 'null') as Record<string, string> | null
+    if (!p) return
+    for (const [k, v] of Object.entries(p)) boot.style.setProperty(`--boot-${k}`, v)
+  } catch {
+    return
+  }
+}
+
+applyBootPalette()
+
 const mb = (bytes: number): string => (bytes / 1024 / 1024).toFixed(bytes > 100 * 1024 * 1024 ? 0 : 1)
 
 function reveal(): void {

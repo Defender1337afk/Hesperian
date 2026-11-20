@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, shell } from 'electron'
-import { mkdir, readFile, stat } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { totalmem } from 'node:os'
-import { extname, join } from 'node:path'
+import { join } from 'node:path'
 import type { ContentKind, ContentUpdate, Instance, NewInstance, Settings, StoreQuery, SystemInfo } from '../shared/types'
 import * as accounts from './accounts'
 import { dataRoot, getSettings, paths, updateSettings } from './config'
@@ -17,6 +17,7 @@ import { ensureInstalled, isRunning, launchExternal, launchGame, stopGame } from
 import { listVersions } from './minecraft/vanilla'
 import * as modpacks from './modpacks'
 import * as modrinth from './modrinth'
+import * as curseforge from './curseforge'
 import * as updates from './updates'
 import * as servers from './servers'
 import * as skins from './skins'
@@ -25,14 +26,12 @@ import { restoreWindow, unloadWindow } from './window'
 import { optimizeInstance } from './optimize'
 import { updateLocalMods } from './localmods'
 import * as astra from './astra'
+import { clearBackgrounds, importBackground } from './backgrounds'
+import { readStats, takeReports, todayPlaytime } from './session'
+import { checkConflicts } from './modmeta'
+import { dropFiles } from './drop'
+import { autoBackupWorlds, cleanInstance, createShortcut, instanceSize, refreshTray, trayActive } from './extras'
 
-const MAX_BACKGROUND_BYTES = 12 * 1024 * 1024
-const IMAGE_TYPES: Record<string, string> = {
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp'
-}
 
 const window = (): BrowserWindow | undefined => BrowserWindow.getAllWindows()[0]
 
@@ -43,7 +42,8 @@ const FOLDERS: Record<string, string> = {
   shaderpacks: 'shaderpacks',
   saves: 'saves',
   screenshots: 'screenshots',
-  logs: 'logs'
+  logs: 'logs',
+  'crash-reports': 'crash-reports'
 }
 
 export const api = {
@@ -55,13 +55,21 @@ export const api = {
   }),
 
   getSettings: async () => getSettings(),
-  updateSettings: async (patch: Partial<Settings>) => updateSettings(patch),
+  updateSettings: async (patch: Partial<Settings>) => {
+    const next = updateSettings(patch)
+    if ('minimizeToTray' in patch) await refreshTray()
+    return next
+  },
   winMinimize: async () => window()?.minimize(),
   winMaximize: async () => {
     const win = window()
     if (win) win.isMaximized() ? win.unmaximize() : win.maximize()
   },
-  winClose: async () => window()?.close(),
+  winClose: async () => {
+    const win = window()
+    if (win && trayActive()) win.hide()
+    else win?.close()
+  },
   setFullscreen: async (on: boolean) => window()?.setFullScreen(on),
   panoramaFaces,
   listWorlds: gallery.listWorlds,
@@ -105,7 +113,18 @@ export const api = {
       return
     }
     const auth = await accounts.getLaunchAuth()
-    const updated = await updateLocalMods(id).catch(() => [] as string[])
+    if (instance.autoBackup) {
+      const task = new Task('Бэкап миров перед запуском')
+      try {
+        const n = await autoBackupWorlds(id)
+        task.finish()
+        if (n) emit('app:toast', { text: `Сохранены копии миров: ${n}`, kind: 'info' })
+      } catch (e) {
+        task.fail(e)
+      }
+    }
+    void refreshTray()
+    const updated = await Promise.race([updateLocalMods(id).catch(() => [] as string[]), new Promise<string[]>((r) => setTimeout(() => r([]), 4000))])
     if (updated.length) emit('app:toast', { text: `Обновлено: ${updated.join(', ')}`, kind: 'info' })
     instances.updateInstance(id, { lastPlayedAt: Date.now() })
     const server = options?.server?.trim() || undefined
@@ -119,6 +138,23 @@ export const api = {
     else if (after === 'hide') window()?.hide()
   },
   stop: async (id: string) => stopGame(id),
+  instanceStats: async (id: string) => {
+    instances.assertId(id)
+    return readStats(id)
+  },
+  takeSessionReports: async () => takeReports(),
+  todayPlaytime: async () => todayPlaytime((await instances.listInstances()).map((i) => i.id)),
+  checkConflicts: async (id: string) => checkConflicts(id),
+  dropFiles: async (instanceId: string | null, files: string[]) => dropFiles(instanceId, files),
+  createShortcut: async (id: string) => createShortcut(id),
+  instanceSize: async (id: string) => {
+    instances.assertId(id)
+    return instanceSize(id)
+  },
+  cleanInstance: async (id: string) => {
+    instances.assertId(id)
+    return cleanInstance(id)
+  },
 
   optimizeInstance,
   checkUpdate,
@@ -187,10 +223,13 @@ export const api = {
     return !canceled
   },
 
-  searchStore: async (q: StoreQuery) => modrinth.searchStore(q),
-  getProject: modrinth.getProject,
-  getProjectVersions: modrinth.getProjectVersions,
-  installFromStore: modrinth.installFromStore,
+  searchStore: async (q: StoreQuery) => (q.source === 'curseforge' ? curseforge.searchCurseforge(q) : modrinth.searchStore(q)),
+  getProject: (id: string) => (curseforge.isCurseforge(id) ? curseforge.getCurseforgeProject(id) : modrinth.getProject(id)),
+  getProjectVersions: (id: string, gameVersion?: string, loader?: string) =>
+    curseforge.isCurseforge(id) ? curseforge.getCurseforgeVersions(id, gameVersion, loader) : modrinth.getProjectVersions(id, gameVersion, loader),
+  installFromStore: (instanceId: string, kind: ContentKind, projectId: string, versionId?: string) =>
+    curseforge.isCurseforge(projectId) ? curseforge.installFromCurseforge(instanceId, kind, projectId, versionId) : modrinth.installFromStore(instanceId, kind, projectId, versionId),
+  curseforgeReady: async () => curseforge.curseforgeAvailable(),
 
   installModpack: modpacks.installModpack,
   importModpack: async () => {
@@ -250,15 +289,18 @@ export const api = {
     const parent = window()
     const options = {
       properties: ['openFile'] as 'openFile'[],
-      filters: [{ name: 'Изображения', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
+      filters: [
+        { name: 'Картинки, GIF и видео', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'mp4', 'webm'] }
+      ]
     }
     const res = parent ? await dialog.showOpenDialog(parent, options) : await dialog.showOpenDialog(options)
     if (res.canceled) return null
-    const path = res.filePaths[0]
-    if ((await stat(path)).size > MAX_BACKGROUND_BYTES) throw new Error('Файл больше 12 МБ')
-    const type = IMAGE_TYPES[extname(path).toLowerCase()]
-    if (!type) throw new Error('Формат не поддерживается')
-    return `data:${type};base64,${(await readFile(path)).toString('base64')}`
+    return importBackground(res.filePaths[0])
+  },
+  importBackground: async (path: string) => importBackground(path),
+  clearBackground: async () => {
+    await clearBackgrounds()
+    return updateSettings({ backgroundImage: '' })
   },
   relaunch: async () => {
     app.relaunch()

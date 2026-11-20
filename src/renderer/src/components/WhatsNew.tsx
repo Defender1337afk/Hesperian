@@ -12,7 +12,7 @@ export function WhatsNew(): ReactNode {
         <div className="wn-hero">
           <span className="wn-version">Hesperian {CURRENT.version}</span>
           <h2 className="wn-codename">{CURRENT.codename}</h2>
-          <p className="muted">Большое обновление лаунчера</p>
+          <p className="muted">Обновление лаунчера</p>
         </div>
         <div className="wn-list">
           {WHATS_NEW.map((item, i) => (

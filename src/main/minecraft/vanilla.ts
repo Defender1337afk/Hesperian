@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import type { McVersion } from '../../shared/types'
 import { paths } from '../config'
-import type { Task } from '../events'
+import { Task } from '../events'
 import { Checksum, download, fetchJson, fileMatches, pool } from '../net'
 import { libraryFiles, libraryKey, LibraryFile, RawLibrary, Rule } from './library'
 
@@ -13,6 +13,7 @@ const MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2
 const FIRST_SUPPORTED = '1.16.5'
 const EXPERIMENTAL_OLD = new Set(['20w14infinite'])
 const CONCURRENCY = 16
+const ASSET_CONCURRENCY = 32
 
 interface ManifestEntry extends McVersion {
   url: string
@@ -103,21 +104,31 @@ interface Job {
   size?: number
 }
 
-export async function fetchMissing(jobs: Job[], task: Task, label: string, verify = false): Promise<void> {
-  const pending: Job[] = []
-  for (const job of jobs) {
-    let ok = await fileMatches(job.dest, job.size)
-    if (ok && verify && job.checksum?.algo === 'sha1') ok = (await sha1Of(job.dest)) === job.checksum.value
-    if (!ok) pending.push(job)
-  }
+export async function fetchMissing(jobs: Job[], task: Task | string, label: string, verify = false, concurrency = CONCURRENCY): Promise<void> {
+  const flags = await Promise.all(
+    jobs.map(async (job) => {
+      let ok = await fileMatches(job.dest, job.size)
+      if (ok && verify && job.checksum?.algo === 'sha1') ok = (await sha1Of(job.dest)) === job.checksum.value
+      return ok
+    })
+  )
+  const pending = jobs.filter((_, i) => !flags[i])
   if (!pending.length) return
-  task.stage(label, pending.length)
+  const own = typeof task === 'string' ? new Task(task) : null
+  const t = own ?? (task as Task)
+  t.stage(label, pending.length)
   let done = 0
-  await pool(pending, CONCURRENCY, async (job) => {
-    if (!job.urls.length) throw new Error(`Файл не удалось получить: ${job.dest}`)
-    await download(job.urls, job.dest, { checksum: job.checksum })
-    task.progress(++done)
-  })
+  try {
+    await pool(pending, concurrency, async (job) => {
+      if (!job.urls.length) throw new Error(`Файл не удалось получить: ${job.dest}`)
+      await download(job.urls, job.dest, { checksum: job.checksum })
+      t.progress(++done)
+    })
+    own?.finish()
+  } catch (e) {
+    own?.fail(e)
+    throw e
+  }
 }
 
 const libraryJob = (file: LibraryFile): Job => ({
@@ -135,7 +146,7 @@ export const fetchLibraries = async (libs: RawLibrary[], task: Task, verify = fa
     verify
   )
 
-async function installAssets(version: VersionJson, task: Task, verify: boolean): Promise<void> {
+export async function installAssets(version: VersionJson, task: Task | string, verify: boolean): Promise<void> {
   const index = version.assetIndex
   if (!index) return
   const indexPath = join(paths.assets(), 'indexes', `${index.id}.json`)
@@ -149,13 +160,14 @@ async function installAssets(version: VersionJson, task: Task, verify: boolean):
   await fetchMissing(
     Object.values(data.objects).map(({ hash, size }) => ({
       dest: objectPath(hash),
-      urls: [`https://resources.download.minecraft.net/${hash.slice(0, 2)}/${hash}`],
+      urls: [`https://resources.download.minecraft.net/${hash.slice(0, 2)}/${hash}`, `https://bmclapi2.bangbang93.com/assets/${hash.slice(0, 2)}/${hash}`],
       size,
       checksum: { algo: 'sha1' as const, value: hash }
     })),
     task,
     'Ресурсы игры',
-    verify
+    verify,
+    ASSET_CONCURRENCY
   )
 }
 
@@ -197,9 +209,10 @@ export async function installVanilla(id: string, task: Task, verify = false): Pr
       checksum: { algo: 'sha1', value: log.sha1 }
     })
   }
-  await fetchMissing(jobs, task, `Клиент ${id}`, verify)
-  await fetchLibraries(version.libraries, task, verify)
-  await installAssets(version, task, verify)
+  await Promise.all([
+    fetchMissing(jobs, task, `Клиент ${id}`, verify).then(() => fetchLibraries(version.libraries, task, verify)),
+    installAssets(version, `Ресурсы Minecraft ${id}`, verify)
+  ])
 }
 
 export async function extractNatives(versionId: string, libs: RawLibrary[]): Promise<string> {

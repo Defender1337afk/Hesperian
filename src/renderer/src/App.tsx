@@ -6,6 +6,7 @@ import { useStore } from './store'
 import { WhatsNew } from './components/WhatsNew'
 import { Clawd } from './components/Clawd'
 import { FunHooks } from './components/Fun'
+import { DropZone, Hotkeys, SessionReports } from './components/Aether'
 import { releaseName } from '../../shared/release'
 import { isBloom } from './themes'
 import { ActiveView } from './views/ActiveView'
@@ -20,6 +21,7 @@ function onKey(e: KeyboardEvent): void {
   else if (mod && k === 'p') useStore.setState({ palette: 'instances' })
   else if (mod && k === 'b') s.toggleSidebar()
   else if (mod && (e.code === 'Backquote' || k === 'j')) useStore.setState({ panelOpen: !s.panelOpen })
+  else if (e.key === 'F1') window.dispatchEvent(new Event('hesperian:hotkeys'))
   else if (e.key === 'F11') {
     if (s.bigPicture) void s.exitBigPicture()
     else void s.enterBigPicture()
@@ -40,6 +42,19 @@ function onKey(e: KeyboardEvent): void {
   }
 }
 
+function Backdrop({ src, opacity, blur, fit }: { src: string; opacity: number; blur: number; fit: 'cover' | 'contain' }): ReactNode {
+  const inner: React.CSSProperties = { filter: blur ? `blur(${blur}px)` : undefined }
+  return (
+    <div className="content-bg" style={{ opacity: opacity / 100 }}>
+      {/\.(mp4|webm)$/i.test(src) ? (
+        <video className="content-bg-media" src={src} style={{ ...inner, objectFit: fit }} autoPlay muted loop playsInline />
+      ) : (
+        <div className="content-bg-media" style={{ ...inner, backgroundImage: `url(${src})`, backgroundSize: fit }} />
+      )}
+    </div>
+  )
+}
+
 function Overlays(): ReactNode {
   return (
     <>
@@ -54,6 +69,9 @@ function Overlays(): ReactNode {
       <WhatsNew />
       <Clawd />
       <FunHooks />
+      <DropZone />
+      <SessionReports />
+      <Hotkeys />
       <Toasts />
     </>
   )
@@ -65,6 +83,8 @@ export function App(): ReactNode {
   const theme = useStore((s) => s.settings?.theme)
   const background = useStore((s) => s.settings?.backgroundImage)
   const opacity = useStore((s) => s.settings?.backgroundOpacity ?? 15)
+  const blur = useStore((s) => s.settings?.backgroundBlur ?? 0)
+  const fit = useStore((s) => s.settings?.backgroundFit ?? 'cover')
 
   const bloom = isBloom(theme)
 
@@ -91,7 +111,7 @@ export function App(): ReactNode {
           <main className="main">
             {!bloom && <TabBar />}
             <div className="content">
-              {background && <div className="content-bg" style={{ backgroundImage: `url(${background})`, opacity: opacity / 100 }} />}
+              {background && <Backdrop src={background} opacity={opacity} blur={blur} fit={fit} />}
               <ActiveView />
             </div>
           </main>

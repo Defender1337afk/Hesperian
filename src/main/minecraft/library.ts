@@ -68,6 +68,9 @@ const withMirrors = (path: string, base?: string): string[] => {
   return [...new Set([...normalized, ...MIRRORS])].map((root) => root + path)
 }
 
+const MOJANG_LIBS = 'https://libraries.minecraft.net/'
+const withMojangMirror = (url: string): string[] => (url.startsWith(MOJANG_LIBS) ? [url, `https://bmclapi2.bangbang93.com/maven/${url.slice(MOJANG_LIBS.length)}`] : [url])
+
 export function libraryKey(lib: RawLibrary): string {
   const [group, artifact, , classifier] = lib.name.split('@')[0].split(':')
   return `${group}:${artifact}:${classifier ?? ''}`
@@ -83,7 +86,7 @@ export function libraryFiles(lib: RawLibrary): LibraryFile[] {
     const rel = artifact.path || mavenPath(lib.name)
     files.push({
       dest: join(root, rel),
-      urls: artifact.url ? [artifact.url] : [],
+      urls: artifact.url ? withMojangMirror(artifact.url) : [],
       sha1: artifact.sha1,
       size: artifact.size,
       native: false

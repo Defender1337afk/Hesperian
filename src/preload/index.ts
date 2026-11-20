@@ -1,8 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
-const EVENTS = new Set(['task', 'game:log', 'game:state', 'account:login', 'win:state', 'app:toast', 'server:log', 'server:state', 'skins:found', 'update:progress'])
+const EVENTS = new Set(['task', 'game:log', 'game:state', 'account:login', 'win:state', 'app:toast', 'server:log', 'server:state', 'skins:found', 'update:progress', 'game:stats', 'game:session'])
 
 contextBridge.exposeInMainWorld('bridge', {
+  pathFor: (file: File) => webUtils.getPathForFile(file),
   invoke: (name: string, ...args: unknown[]) => ipcRenderer.invoke(`api:${name}`, ...args),
   on: (channel: string, listener: (payload: unknown) => void) => {
     if (!EVENTS.has(channel)) throw new Error(`Неизвестное событие: ${channel}`)

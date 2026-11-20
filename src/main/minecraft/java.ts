@@ -69,6 +69,8 @@ async function installBundled(major: number, task: Task): Promise<void> {
   await rm(archive, { force: true })
 }
 
+export const javaReady = (requested: number): boolean => existsSync(javaBin(bundledHome(adoptiumMajor(requested)), false))
+
 export async function ensureJava(requested: number, task: Task, override?: string): Promise<{ java: string; javaGui: string }> {
   if (override) {
     if (!existsSync(override)) throw new Error(`Java не найдена: ${override}`)

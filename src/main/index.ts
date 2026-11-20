@@ -9,6 +9,11 @@ import { stopAllServers } from './servers'
 import { setWindowFactory } from './window'
 import { allowSkinWebviews, watchSkinBrowser } from './skins'
 import { cleanupUpdate } from './update'
+import { registerBackgroundScheme, serveBackgrounds } from './backgrounds'
+import { focusMain, handleLaunchArg, refreshTray, setLauncher, trayActive } from './extras'
+import { restoreWindow } from './window'
+
+registerBackgroundScheme()
 
 const hidden = process.env.HESPERIAN_HIDDEN === '1'
 
@@ -74,16 +79,15 @@ const expose = (): void => {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', () => {
-    const win = BrowserWindow.getAllWindows()[0]
-    if (win) {
-      win.show()
-      win.focus()
-    }
+  app.on('second-instance', (_event, argv) => {
+    restoreWindow()
+    focusMain()
+    handleLaunchArg(argv)
   })
 
   void app.whenReady().then(() => {
     Menu.setApplicationMenu(null)
+    serveBackgrounds()
     setEventSink((channel, payload) => {
       for (const win of BrowserWindow.getAllWindows()) {
         if (!win.isDestroyed() && !win.webContents.isDestroyed()) win.webContents.send(channel, payload)
@@ -94,6 +98,12 @@ if (!app.requestSingleInstanceLock()) {
     watchSkinBrowser()
     createWindow()
     void cleanupUpdate()
+    setLauncher((id) => api.launch(id), () => {
+      restoreWindow()
+      focusMain()
+    })
+    void refreshTray()
+    handleLaunchArg(process.argv)
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
@@ -102,6 +112,6 @@ if (!app.requestSingleInstanceLock()) {
   app.on('before-quit', stopAllServers)
 
   app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin' && !anyRunning()) app.quit()
+    if (process.platform !== 'darwin' && !anyRunning() && !trayActive()) app.quit()
   })
 }

@@ -162,8 +162,6 @@ export interface StoreHit {
   downloads: number
   follows: number
   categories: string[]
-  local?: boolean
-  gameVersion?: string
 }
 
 export interface StoreResult {
@@ -189,7 +187,6 @@ export interface StoreProject {
   wikiUrl?: string
   gallery: { url: string; title?: string }[]
   updatedAt: string
-  local?: boolean
 }
 
 export interface StoreVersion {
@@ -222,11 +219,6 @@ export interface ContentUpdate {
 }
 
 
-
-export interface AstraHome {
-  installed: boolean
-  style: number
-}
 
 export interface ServerStatus {
   state: 'stopped' | 'starting' | 'running'

@@ -6,7 +6,6 @@ installer/bin/
 installer/obj/
 resources/mods/
 
-src/renderer/public/astra/
 assets/tilkayo.jpg
 
 src/main/private/

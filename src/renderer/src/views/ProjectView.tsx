@@ -88,7 +88,7 @@ export function ProjectView({ projectId }: { projectId: string }): ReactNode {
   const links = [
     project.id.startsWith('cf:')
       ? { url: `https://www.curseforge.com/minecraft/${{ mod: 'mc-mods', resourcepack: 'texture-packs', shader: 'shaders', modpack: 'modpacks' }[project.kind]}/${project.slug}`, label: 'CurseForge' }
-      : { url: project.local ? undefined : `https://modrinth.com/project/${project.slug}`, label: 'Modrinth' },
+      : { url: `https://modrinth.com/project/${project.slug}`, label: 'Modrinth' },
     { url: project.sourceUrl, label: 'Исходный код' },
     { url: project.issuesUrl, label: 'Проблемы' },
     { url: project.wikiUrl, label: 'Вики' }
@@ -118,14 +118,8 @@ export function ProjectView({ projectId }: { projectId: string }): ReactNode {
         </div>
       </div>
       <div className="cv-rating">
-        {project.local ? (
-          <span className="muted">Встроена в Hesperian, скачивать отдельно не нужно</span>
-        ) : (
-          <>
-            <span className="big">{formatDownloads(project.downloads)}</span>
-            <span className="muted">скачиваний · {project.license ?? 'лицензия не указана'} · обновлён {formatDate(project.updatedAt)}</span>
-          </>
-        )}
+        <span className="big">{formatDownloads(project.downloads)}</span>
+        <span className="muted">скачиваний · {project.license ?? 'лицензия не указана'} · обновлён {formatDate(project.updatedAt)}</span>
         <span className="grow" />
         {links.map((l) => (
           <button key={l.url} className="ghost-btn" onClick={() => void api.openExternal(l.url)}><I.reveal size={13} /> {l.label}</button>

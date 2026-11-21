@@ -24,8 +24,6 @@ import * as skins from './skins'
 import { checkUpdate, installUpdate } from './update'
 import { restoreWindow, unloadWindow } from './window'
 import { optimizeInstance } from './optimize'
-import { updateLocalMods } from './localmods'
-import * as astra from './astra'
 import { clearBackgrounds, importBackground } from './backgrounds'
 import { readStats, takeReports, todayPlaytime } from './session'
 import { checkConflicts } from './modmeta'
@@ -124,8 +122,6 @@ export const api = {
       }
     }
     void refreshTray()
-    const updated = await Promise.race([updateLocalMods(id).catch(() => [] as string[]), new Promise<string[]>((r) => setTimeout(() => r([]), 4000))])
-    if (updated.length) emit('app:toast', { text: `Обновлено: ${updated.join(', ')}`, kind: 'info' })
     instances.updateInstance(id, { lastPlayedAt: Date.now() })
     const server = options?.server?.trim() || undefined
     await launchGame(instance, auth, (played) => {
@@ -193,8 +189,6 @@ export const api = {
   setLowEnd: async (on: boolean) =>
     updateSettings(on ? { lowEnd: true, afterLaunch: 'unload', animations: false } : { lowEnd: false, afterLaunch: 'keep', animations: true }),
 
-  astraHome: async (id: string) => astra.readHome(instances.getInstance(id)),
-  setAstraStyle: async (id: string, style: number) => astra.writeStyle(instances.getInstance(id), style),
   repair: async (id: string) => {
     const instance = instances.getInstance(id)
     const task = new Task(`Проверка файлов: ${instance.name}`)

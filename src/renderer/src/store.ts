@@ -133,7 +133,6 @@ interface State {
   installModpack(projectId: string, versionId?: string): Promise<void>
   importModpack(): Promise<void>
   exportModpack(id: string): Promise<void>
-  createWithLocalMod(projectId: string, title: string, gameVersion: string): Promise<void>
 }
 
 let toastSeq = 0
@@ -435,22 +434,6 @@ export const useStore = create<State>((set, get) => ({
       await get().refreshInstances()
       get().openInstance(instance.id)
       get().toast('info', `Модпак «${instance.name}» импортирован`)
-    } catch (e) {
-      get().toast('error', errorText(e))
-    }
-  },
-
-  async createWithLocalMod(projectId, title, gameVersion) {
-    try {
-      const loaders = await api.loaderVersions('fabric', gameVersion)
-      const loader = loaders.find((v) => v.tag === 'recommended') ?? loaders[0]
-      if (!loader) throw new Error(`Для ${gameVersion} нет сборок Fabric.`)
-      const instance = await api.createInstance({ name: title, mcVersion: gameVersion, loader: 'fabric', loaderVersion: loader.version, color: '#e0705a' })
-      await api.installFromStore(instance.id, 'mod', projectId)
-      await get().refreshInstances()
-      get().select(instance.id)
-      get().bumpContent()
-      get().toast('info', `Сборка с ${title} готова. Нажмите «Играть».`)
     } catch (e) {
       get().toast('error', errorText(e))
     }

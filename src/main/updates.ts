@@ -7,7 +7,6 @@ import { getInstance } from './instances'
 import { hashFile } from './modpacks'
 import { API, installFromStore, type RawProject, type RawVersion } from './modrinth'
 import { fetchJson, postJson } from './net'
-import { installLocal, isLocalMod, localUpdates } from './localmods'
 
 const DISABLED = '.disabled'
 const KINDS: ContentKind[] = ['mod', 'resourcepack', 'shader']
@@ -20,8 +19,6 @@ export async function checkUpdates(instanceId: string, kinds: ContentKind[] = KI
   if (instance.loader === 'vanilla') kinds = kinds.filter((k) => k !== 'mod')
   const meta = readContentMeta(instanceId)
   const found: (ContentUpdate & { projectId: string })[] = []
-  const local = kinds.includes('mod') ? await localUpdates(instanceId) : []
-  const localFiles = new Set(local.map((u) => u.file))
 
   for (const kind of kinds) {
     const dir = contentDir(instance, kind)
@@ -42,7 +39,6 @@ export async function checkUpdates(instanceId: string, kinds: ContentKind[] = KI
     for (const [sha1, version] of Object.entries(latest)) {
       if (version.files.some((f) => f.hashes.sha1 === sha1)) continue
       const file = bySha.get(sha1)!
-      if (localFiles.has(file)) continue
       found.push({
         kind,
         file,
@@ -64,14 +60,10 @@ export async function checkUpdates(instanceId: string, kinds: ContentKind[] = KI
       if (p && !meta[u.file]) Object.assign(u, { title: p.title, iconUrl: p.icon_url ?? undefined })
     }
   }
-  return [...local, ...found].sort((a, b) => a.title.localeCompare(b.title, 'ru'))
+  return [...found].sort((a, b) => a.title.localeCompare(b.title, 'ru'))
 }
 
 export async function applyUpdate(instanceId: string, update: ContentUpdate): Promise<void> {
-  if (isLocalMod(update.projectId)) {
-    await installLocal(instanceId, update.projectId)
-    return
-  }
   const instance = getInstance(instanceId)
   const dir = contentDir(instance, update.kind)
   const wasDisabled = existsSync(join(dir, update.file + DISABLED)) && !existsSync(join(dir, update.file))

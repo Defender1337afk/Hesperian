@@ -1,5 +1,4 @@
 import { basename, join } from 'node:path'
-import { assertLocalFits, installLocal, isLocalMod, localHits, localProject, localVersions } from './localmods'
 import type { ContentKind, StoreHit, StoreKind, StoreProject, StoreQuery, StoreResult, StoreVersion } from '../shared/types'
 import { contentDir, filesOfProject, forgetContent, recordContent } from './content'
 import { Task } from './events'
@@ -72,10 +71,8 @@ export async function searchStore(q: StoreQuery): Promise<StoreResult> {
   const res = await fetchJson<{ hits: RawHit[]; total_hits: number; offset: number; limit: number }>(
     `${API}/search?${params}`
   )
-  const local = q.kind === 'mod' && q.offset === 0 ? localHits(q.query) : []
   return {
     hits: [
-      ...local,
       ...res.hits.map(
       (h): StoreHit => ({
         id: h.project_id,
@@ -90,14 +87,13 @@ export async function searchStore(q: StoreQuery): Promise<StoreResult> {
       })
       )
     ],
-    total: res.total_hits + local.length,
+    total: res.total_hits,
     offset: res.offset,
     limit: res.limit
   }
 }
 
 export async function getProject(id: string): Promise<StoreProject> {
-  if (isLocalMod(id)) return localProject(id)
   const p = await fetchJson<RawProject>(`${API}/project/${encodeURIComponent(id)}`)
   return {
     id: p.id,
@@ -128,7 +124,6 @@ export const fetchVersions = (projectId: string, gameVersion?: string, loader?: 
 }
 
 export async function getProjectVersions(projectId: string, gameVersion?: string, loader?: string): Promise<StoreVersion[]> {
-  if (isLocalMod(projectId)) return localVersions(projectId, gameVersion, loader)
   const versions = await fetchVersions(projectId, gameVersion, loader)
   return versions.map((v) => ({
     id: v.id,
@@ -153,12 +148,6 @@ export async function installFromStore(
   projectId: string,
   versionId?: string
 ): Promise<InstallOutcome> {
-  if (isLocalMod(projectId)) {
-    assertLocalFits(instanceId, projectId)
-    const dependency = await installFromStore(instanceId, 'mod', 'fabric-api')
-    const title = await installLocal(instanceId, projectId)
-    return { installed: [title, ...dependency.installed], skippedDependencies: dependency.skippedDependencies }
-  }
   const instance = getInstance(instanceId)
   if (kind === 'mod' && instance.loader === 'vanilla') {
     throw new Error('В ванильной сборке нет загрузчика модов. Создайте сборку с Fabric или Forge.')

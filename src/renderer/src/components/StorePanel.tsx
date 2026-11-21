@@ -70,10 +70,7 @@ function HitRow({ hit, index, kind, canInstall, installed, targetId }: {
   const openProject = useStore((s) => s.openProject)
   const install = useInstall()
   const installModpack = useStore((s) => s.installModpack)
-  const createWithLocalMod = useStore((s) => s.createWithLocalMod)
-  const target = useStore((s) => s.instances.find((i) => i.id === targetId))
   const [busy, setBusy] = useState(false)
-  const needsNew = Boolean(hit.local && hit.gameVersion && !(target && target.mcVersion === hit.gameVersion && target.loader === 'fabric'))
   return (
     <div className="hit" style={{ '--i': Math.min(index, 12) } as React.CSSProperties} onClick={() => openProject(hit.id, hit.title)}>
       {hit.iconUrl ? <img className="hit-icon" src={hit.iconUrl} alt="" loading="lazy" /> : <span className="hit-icon hit-icon-empty"><I.cube size={18} /></span>}
@@ -87,19 +84,6 @@ function HitRow({ hit, index, kind, canInstall, installed, targetId }: {
           <span className="hit-author">{hit.author}</span>
           {installed ? (
             <span className="role">установлено</span>
-          ) : needsNew ? (
-            <button
-              className="ghost-btn hit-install"
-              disabled={busy}
-              title={`Нужна ${hit.gameVersion} с Fabric`}
-              onClick={(e) => {
-                e.stopPropagation()
-                setBusy(true)
-                void createWithLocalMod(hit.id, hit.title, hit.gameVersion!).finally(() => setBusy(false))
-              }}
-            >
-              {busy ? <span className="spinner" /> : <I.plus size={13} />} Создать сборку
-            </button>
           ) : (
             canInstall && (
               <button
@@ -233,7 +217,7 @@ export function StorePanel(): ReactNode {
         {loading && <div className="store-note"><span className="spinner" /></div>}
         {!loading && hits.length > 0 && hits.length < total && (
           <div className="pad-x hits-more">
-            <button className="btn full" onClick={() => void run(hits.filter((h) => !h.local).length)}>Показать ещё</button>
+            <button className="btn full" onClick={() => void run(hits.length)}>Показать ещё</button>
           </div>
         )}
       </div>

@@ -345,7 +345,7 @@ export function NewInstanceDialog(): ReactNode {
             {experiment.id === HORIZON.id && (
               <p className="hint exp-note">
                 Сторонний проект, не связан с Mojang и Hesperian. Запускается через собственный лаунчер Horizon: он сам входит в аккаунт Microsoft,
-                ему нужна купленная Minecraft: Java Edition. Офлайн-аккаунт Hesperian и наши моды здесь не работают, Astra Visuals тоже.
+                ему нужна купленная Minecraft: Java Edition. Офлайн-аккаунт Hesperian и моды здесь не работают.
               </p>
             )}
             <span className="field-label">Первоапрельские версии Mojang</span>

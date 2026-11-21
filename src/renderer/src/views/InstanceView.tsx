@@ -5,7 +5,7 @@ import { errorText, formatBytes, formatDate, formatPlayTime, IconBtn, INSTANCE_C
 import { I } from '../components/icons'
 import { BarChart, LineChart } from '../components/Chart'
 import { useStore } from '../store'
-import { AstraStyleRow, OptimizeRow, ScreenshotsSection, WorldsSection } from './InstanceExtras'
+import { OptimizeRow, ScreenshotsSection, WorldsSection } from './InstanceExtras'
 
 type Section = 'overview' | 'stats' | ContentKind | 'worlds' | 'screenshots' | 'settings'
 
@@ -50,7 +50,6 @@ function Overview({ instance }: { instance: Instance }): ReactNode {
           {pack.projectId && <button className="btn" onClick={() => openProject(pack.projectId!, pack.title)}><I.store size={14} /> Страница модпака</button>}
         </Row>
       )}
-      <AstraStyleRow instance={instance} />
       <OptimizeRow instance={instance} />
       <DiskRow instance={instance} />
       <Row title="Папки" desc="Откроются в проводнике">
@@ -504,7 +503,7 @@ function StatsSection({ instance }: { instance: Instance }): ReactNode {
               {fps.length > 1 ? (
                 <LineChart points={fps} unit="FPS" color="var(--accent)" />
               ) : (
-                <p className="muted stat-note">FPS записывается в сборках с Astra Visuals 1.3 и новее. Поставьте её из магазина, поиск «defender».</p>
+                <p className="muted stat-note">FPS появится, когда в сборке будет мод, который сообщает его лаунчеру.</p>
               )}
             </div>
             <div className="stat-chart">

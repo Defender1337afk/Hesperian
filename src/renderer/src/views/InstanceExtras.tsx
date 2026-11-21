@@ -96,33 +96,6 @@ export function ScreenshotsSection({ instance }: { instance: Instance }): ReactN
   )
 }
 
-const ASTRA_STYLES: [number, string][] = [[0, 'Minecraft'], [1, 'Astra'], [2, 'GNOME'], [3, 'Windows 11'], [4, 'macOS']]
-
-export function AstraStyleRow({ instance }: { instance: Instance }): ReactNode {
-  const toast = useStore((s) => s.toast)
-  const revision = useStore((s) => s.contentRevision)
-  const [style, setStyle] = useState<number | null>(null)
-  useEffect(() => {
-    api
-      .astraHome(instance.id)
-      .then((home) => setStyle(home.installed ? home.style : null))
-      .catch(() => setStyle(null))
-  }, [instance.id, revision])
-  if (style === null) return null
-  return (
-    <Row title="Главное меню Astra" desc="Стиль меню в игре. Его же можно переключить прямо на главном экране">
-      <Seg
-        value={style}
-        options={ASTRA_STYLES}
-        onChange={(next) => {
-          setStyle(next)
-          api.setAstraStyle(instance.id, next).catch((e) => toast('error', errorText(e)))
-        }}
-      />
-    </Row>
-  )
-}
-
 export function OptimizeRow({ instance }: { instance: Instance }): ReactNode {
   const toast = useStore((s) => s.toast)
   const bumpContent = useStore((s) => s.bumpContent)
